@@ -1,0 +1,20 @@
+# TODO: Configure Render deployment
+# This is a placeholder for automated deployment configuration
+# Add services, databases, and deployment settings
+
+services:
+  - type: web
+    name: backend-api
+    # TODO: Add build and start commands
+
+  - type: web
+    name: ml-service
+    # TODO: Add build and start commands
+
+  - type: web
+    name: frontend
+    # TODO: Add build and start commands
+
+databases:
+  - name: capstack-db
+    # TODO: Configure PostgreSQL database

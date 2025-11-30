@@ -1,0 +1,531 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Box,
+  Chip,
+  LinearProgress,
+  Button,
+  Paper,
+  Alert,
+  AlertTitle,
+  CircularProgress,
+  Stack,
+  useTheme
+} from '@mui/material';
+
+import {
+  PieChart as RechartsPie,
+  Pie,
+  Cell,
+  BarChart as RechartsBar,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+
+import {
+  AccountBalance,
+  TrendingUp,
+  Savings,
+  ShowChart,
+  Shield,
+  Refresh,
+  CheckCircle,
+  Info
+} from '@mui/icons-material';
+
+import api from '@/utils/axiosClient';
+
+interface AllocationData {
+  allocation: {
+    sipPercentage: number;
+    stocksPercentage: number;
+    bondsPercentage: number;
+    lifestylePercentage: number;
+    emergencyFundPercentage: number;
+    allocatedAmounts: {
+      sip: number;
+      stocks: number;
+      bonds: number;
+      lifestyle: number;
+      emergency: number;
+    };
+    reasoning: string[];
+  };
+  formulas: {
+    sipCagr: number;
+    emergencyMonths: number;
+    debtToIncome: number;
+    savingsRate: number;
+    investmentRiskScore: number;
+    stabilityIndex: number;
+  };
+}
+
+//
+// --------------------------- VALIDATION ---------------------------
+//
+
+function isValidAllocationResponse(data: any): boolean {
+  if (!data?.allocation || !data?.formulas) return false;
+
+  const a = data.allocation;
+  const f = data.formulas;
+
+  const allocationKeys = [
+    "sipPercentage", "stocksPercentage", "bondsPercentage",
+    "lifestylePercentage", "emergencyFundPercentage",
+    "allocatedAmounts", "reasoning"
+  ];
+
+  const formulaKeys = [
+    "sipCagr", "emergencyMonths", "debtToIncome",
+    "savingsRate", "investmentRiskScore", "stabilityIndex"
+  ];
+
+  for (let k of allocationKeys) if (!(k in a)) return false;
+  for (let k of formulaKeys) if (!(k in f)) return false;
+
+  const amountKeys = ["sip", "stocks", "bonds", "lifestyle", "emergency"];
+  if (!a.allocatedAmounts) return false;
+
+  for (let k of amountKeys) if (!(k in a.allocatedAmounts)) return false;
+
+  return true;
+}
+
+//
+// --------------------------- SAMPLE FALLBACK ---------------------------
+//
+
+function generateSampleFallback(sample: any): AllocationData {
+  const monthlyIncome = Number(sample.monthlyIncome) || 60000;
+  const monthlyExpenses = Number(sample.monthlyExpenses) || 25000;
+  const emergency = Number(sample.emergencyFund) || 50000;
+
+  return {
+    allocation: {
+      sipPercentage: 30,
+      stocksPercentage: 20,
+      bondsPercentage: 15,
+      lifestylePercentage: 25,
+      emergencyFundPercentage: 10,
+      allocatedAmounts: {
+        sip: sample.investmentHistory?.sip || 5000,
+        stocks: sample.investmentHistory?.stocks || 12000,
+        bonds: sample.investmentHistory?.bonds || 4000,
+        lifestyle: Math.round(monthlyExpenses * 0.25),
+        emergency
+      },
+      reasoning: ["Using Sample Data (Backend Not Responding)"]
+    },
+    formulas: {
+      sipCagr: sample.estimatedSipCagr || 10,
+      emergencyMonths: +(emergency / monthlyExpenses).toFixed(1),
+      debtToIncome: +(sample.totalDebt / monthlyIncome || 0).toFixed(2),
+      savingsRate: +(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100).toFixed(1),
+      investmentRiskScore: sample.riskScore || 5,
+      stabilityIndex: sample.stabilityIndex || 65
+    }
+  };
+}
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+
+//
+// --------------------------- MAIN COMPONENT ---------------------------
+//
+
+export default function Allocation() {
+  const theme = useTheme();
+
+  const [data, setData] = useState<AllocationData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  //
+  // --------------------------- FETCH LOGIC ---------------------------
+  //
+
+  const fetchAllocationData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await api.get('/finance/asset-allocation');
+
+      // Backend returned an error format
+      if (response.data?.error || response.data?.message || response.data?.success === false) {
+        throw new Error(response.data.error || response.data.message || "Invalid backend response");
+      }
+
+      // Validation failed
+      if (!isValidAllocationResponse(response.data)) {
+        throw new Error("Backend returned incomplete allocation data");
+      }
+
+      setData(response.data);
+    } catch (err: any) {
+      console.error("Asset Allocation API Failed:", err);
+
+      setError(err.message || "Unknown backend error");
+
+      // Try sample.json
+      try {
+        const r = await fetch('/data/sample_dataset.json');
+        const sample = await r.json();
+        setData(generateSampleFallback(sample));
+        setError("Backend unavailable — showing sample data.");
+      } catch (fallbackErr) {
+        setError("Critical: Unable to load allocation data.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllocationData();
+  }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchAllocationData();
+    setTimeout(() => setRefreshing(false), 800);
+  };
+
+  //
+  // --------------------------- LOADING UI ---------------------------
+  //
+
+  if (loading) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, textAlign: "center" }}>
+        <CircularProgress size={60} sx={{ mb: 2 }} />
+        <Typography variant="h6">Calculating your optimal asset allocation...</Typography>
+      </Container>
+    );
+  }
+
+  //
+  // --------------------------- ERROR UI ---------------------------
+  //
+
+  if (error) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Alert severity={error.includes("sample") ? "warning" : "error"} sx={{ mb: 4 }}>
+          <AlertTitle>
+            {error.includes("sample") ? "Using Sample Data" : "Backend Error"}
+          </AlertTitle>
+          {error}
+        </Alert>
+
+        <Box textAlign="center">
+          <Button variant="contained" onClick={fetchAllocationData}>Retry</Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!data) return null;
+
+  //
+  // --------------------------- CHART DATA ---------------------------
+  //
+
+  const { allocation, formulas } = data;
+
+  const pieData = [
+    { name: 'SIP (Mutual Funds)', value: allocation.sipPercentage, amount: allocation.allocatedAmounts.sip },
+    { name: 'Stocks', value: allocation.stocksPercentage, amount: allocation.allocatedAmounts.stocks },
+    { name: 'Bonds/FD', value: allocation.bondsPercentage, amount: allocation.allocatedAmounts.bonds },
+    { name: 'Lifestyle Spending', value: allocation.lifestylePercentage, amount: allocation.allocatedAmounts.lifestyle },
+    { name: 'Emergency Fund', value: allocation.emergencyFundPercentage, amount: allocation.allocatedAmounts.emergency }
+  ];
+
+  const barData = [
+    { category: 'SIP', amount: allocation.allocatedAmounts.sip },
+    { category: 'Stocks', amount: allocation.allocatedAmounts.stocks },
+    { category: 'Bonds', amount: allocation.allocatedAmounts.bonds },
+    { category: 'Lifestyle', amount: allocation.allocatedAmounts.lifestyle },
+    { category: 'Emergency', amount: allocation.allocatedAmounts.emergency }
+  ];
+
+  //
+  // --------------------------- UI RENDER ---------------------------
+  //
+
+  return (
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+
+      {/* ---------------- HEADER ---------------- */}
+      <Box sx={{ mb: 4 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+            color: "white",
+            position: "relative",
+          }}
+        >
+          <Box sx={{ position: "absolute", top: -40, right: -40, opacity: 0.08 }}>
+            <AccountBalance sx={{ fontSize: 180 }} />
+          </Box>
+
+          <Typography variant="h3" fontWeight="800">
+            AI Asset Allocation
+          </Typography>
+          <Typography variant="h6" sx={{ opacity: 0.9 }}>
+            Personalized portfolio optimization based on your financial profile
+          </Typography>
+
+          <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={
+                <Refresh
+                  sx={{
+                    transform: refreshing ? "rotate(360deg)" : "none",
+                    transition: "0.6s",
+                  }}
+                />
+              }
+              onClick={handleRefresh}
+              sx={{ color: "white", borderColor: "rgba(255,255,255,0.4)" }}
+            >
+              Recalculate
+            </Button>
+          </Stack>
+        </Paper>
+      </Box>
+
+      {/* ---------------- METRICS ---------------- */}
+
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6} lg={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <ShowChart sx={{ mr: 1, color: "primary.main" }} />
+                <Typography variant="h6">Investment Risk Score</Typography>
+              </Box>
+              <Typography variant="h3" color="primary" fontWeight="bold">
+                {formulas.investmentRiskScore}/10
+              </Typography>
+              <LinearProgress
+                variant="determinate"
+                value={formulas.investmentRiskScore * 10}
+                sx={{ mt: 1, height: 8, borderRadius: 4 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Shield sx={{ mr: 1, color: "success.main" }} />
+                <Typography variant="h6">Financial Stability</Typography>
+              </Box>
+              <Typography variant="h3" color="success.main" fontWeight="bold">
+                {formulas.stabilityIndex}/100
+              </Typography>
+              <LinearProgress
+                variant="determinate"
+                color="success"
+                value={formulas.stabilityIndex}
+                sx={{ mt: 1, height: 8, borderRadius: 4 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Savings sx={{ mr: 1, color: "warning.main" }} />
+                <Typography variant="h6">Savings Rate</Typography>
+              </Box>
+              <Typography variant="h3" color="warning.main" fontWeight="bold">
+                {formulas.savingsRate.toFixed(1)}%
+              </Typography>
+              <LinearProgress
+                variant="determinate"
+                color="warning"
+                value={formulas.savingsRate}
+                sx={{ mt: 1, height: 8, borderRadius: 4 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <TrendingUp sx={{ mr: 1, color: "info.main" }} />
+                <Typography variant="h6">SIP CAGR Potential</Typography>
+              </Box>
+              <Typography variant="h3" color="info.main" fontWeight="bold">
+                {formulas.sipCagr.toFixed(1)}%
+              </Typography>
+              <Chip label="10 Year Projection" size="small" sx={{ mt: 1 }} />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* ---------------- CHART SECTION ---------------- */}
+
+      <Grid container spacing={4} sx={{ mb: 4 }}>
+        {/* PIE */}
+        <Grid item xs={12} lg={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Asset Allocation Breakdown
+              </Typography>
+
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsPie>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}%`}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </RechartsPie>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* BAR */}
+        <Grid item xs={12} lg={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Monthly Allocation Amounts
+              </Typography>
+
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsBar data={barData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="category" />
+                  <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                  <RechartsTooltip formatter={(v) => `₹${v.toLocaleString()}`} />
+                  <Bar dataKey="amount" fill={theme.palette.primary.main} />
+                </RechartsBar>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* ---------------- DETAILS ---------------- */}
+
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {pieData.map((item, i) => (
+          <Grid item xs={12} sm={6} md={4} key={item.name}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: "50%",
+                      backgroundColor: COLORS[i % COLORS.length],
+                      mr: 1
+                    }}
+                  />
+                  <Typography variant="h6">{item.name}</Typography>
+                </Box>
+
+                <Typography variant="h4" color="primary" fontWeight="bold">
+                  {item.value}%
+                </Typography>
+
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  ₹{item.amount.toLocaleString()} / month
+                </Typography>
+
+                <Chip
+                  label={item.value >= 20 ? "Priority" : "Secondary"}
+                  size="small"
+                  color={item.value >= 20 ? "primary" : "default"}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* ---------------- AI REASONING ---------------- */}
+
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+            AI Allocation Reasoning
+          </Typography>
+
+          <Stack spacing={2}>
+            {allocation.reasoning.map((r, i) => (
+              <Alert key={i} icon={<Info />} severity="info">
+                {r}
+              </Alert>
+            ))}
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {/* ---------------- ACTION BUTTONS ---------------- */}
+
+      <Box sx={{ textAlign: "center" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="center">
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<CheckCircle />}
+            onClick={() => alert("Allocation Applied")}
+          >
+            Apply Allocation
+          </Button>
+
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<Refresh />}
+            onClick={handleRefresh}
+          >
+            Recalculate
+          </Button>
+        </Stack>
+      </Box>
+    </Container>
+  );
+}

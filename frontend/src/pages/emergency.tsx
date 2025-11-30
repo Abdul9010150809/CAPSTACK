@@ -1,0 +1,491 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Box,
+  Chip,
+  LinearProgress,
+  Button,
+  Paper,
+  Divider,
+  Alert,
+  AlertTitle,
+  CircularProgress,
+  Stack,
+  useTheme,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
+import {
+  Shield,
+  Warning,
+  CheckCircle,
+  Error,
+  TrendingUp,
+  TrendingDown,
+  Refresh,
+  Info,
+  Security,
+  Timeline,
+  AccountBalance
+} from '@mui/icons-material';
+import {
+  PieChart as RechartsPie,
+  Pie,
+  Cell,
+  BarChart as RechartsBar,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line
+} from 'recharts';
+
+import api from '@/utils/axiosClient';
+
+interface EmergencyFundData {
+  status: {
+    currentBalance: number;
+    targetMonths: number;
+    monthlyBurnRate: number;
+    monthsCoverage: number;
+    status: 'excellent' | 'good' | 'adequate' | 'insufficient' | 'critical';
+    recommendedAction: string;
+    alerts: string[];
+  };
+  simulations: Array<{
+    scenario: string;
+    requiredAmount: number;
+    currentShortfall: number;
+    timeToBuild: number;
+    monthlyContribution: number;
+  }>;
+  optimalContribution: {
+    recommendedMonthly: number;
+    targetAmount: number;
+    timeToTarget: number;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+  };
+  depletionRisk: {
+    depletionRisk: 'low' | 'medium' | 'high';
+    monthsUntilCritical: number;
+    riskFactors: string[];
+  };
+  recommendations: string[];
+}
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+export default function Emergency() {
+  const theme = useTheme();
+  const [data, setData] = useState<EmergencyFundData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchEmergencyData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get('/finance/emergency-status');
+      setData(response.data);
+    } catch (err) {
+      console.error('Failed to fetch emergency fund data:', err);
+      setError('Failed to load emergency fund data. Please check backend connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmergencyData();
+  }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchEmergencyData();
+    setTimeout(() => setRefreshing(false), 800);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'excellent': return 'success';
+      case 'good': return 'primary';
+      case 'adequate': return 'warning';
+      case 'insufficient': return 'error';
+      case 'critical': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'excellent': return <CheckCircle color="success" />;
+      case 'good': return <CheckCircle color="primary" />;
+      case 'adequate': return <Warning color="warning" />;
+      case 'insufficient': return <Error color="error" />;
+      case 'critical': return <Error color="error" />;
+      default: return <Info />;
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress size={60} sx={{ mb: 2 }} />
+        <Typography variant="h6">Analyzing your emergency fund...</Typography>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 4 }}>
+          <AlertTitle>Connection Error</AlertTitle>
+          {error}
+        </Alert>
+        <Box textAlign="center">
+          <Button variant="contained" onClick={fetchEmergencyData}>Retry</Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!data) return null;
+
+  const { status, simulations, optimalContribution, depletionRisk, recommendations } = data;
+
+  // Prepare chart data
+  const coverageData = [
+    { name: 'Current Coverage', value: status.monthsCoverage, color: '#0088FE' },
+    { name: 'Target Coverage', value: Math.max(0, status.targetMonths - status.monthsCoverage), color: '#FF8042' }
+  ];
+
+  const simulationData = simulations.map(sim => ({
+    scenario: sim.scenario.split(' ')[0], // Shorten for chart
+    required: sim.requiredAmount,
+    shortfall: sim.currentShortfall,
+    timeToBuild: sim.timeToBuild
+  }));
+
+  return (
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            background: `linear-gradient(135deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
+            color: 'white',
+            position: 'relative'
+          }}
+        >
+          <Box sx={{ position: 'absolute', top: -40, right: -40, opacity: 0.1 }}>
+            <Shield sx={{ fontSize: 180 }} />
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h3" fontWeight="800">
+                Emergency Fund Monitor
+              </Typography>
+              <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                Continuous monitoring and optimization of your financial safety net
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="outlined"
+                startIcon={<Refresh sx={{ transform: refreshing ? 'rotate(360deg)' : 'none', transition: '0.5s' }} />}
+                onClick={handleRefresh}
+                sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}
+              >
+                Recalculate
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
+      </Box>
+
+      {/* Status Overview */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6} lg={3}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AccountBalance sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6">Current Balance</Typography>
+              </Box>
+              <Typography variant="h3" fontWeight="bold" color="primary">
+                ₹{status.currentBalance.toLocaleString()}
+              </Typography>
+              <Chip
+                label={status.status.toUpperCase()}
+                color={getStatusColor(status.status) as any}
+                sx={{ mt: 1 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Timeline sx={{ mr: 1, color: 'success.main' }} />
+                <Typography variant="h6">Months Coverage</Typography>
+              </Box>
+              <Typography variant="h3" fontWeight="bold" color="success.main">
+                {status.monthsCoverage.toFixed(1)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Target: {status.targetMonths} months
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <TrendingDown sx={{ mr: 1, color: 'warning.main' }} />
+                <Typography variant="h6">Monthly Burn Rate</Typography>
+              </Box>
+              <Typography variant="h3" fontWeight="bold" color="warning.main">
+                ₹{status.monthlyBurnRate.toLocaleString()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Monthly expenses
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={3}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Security sx={{ mr: 1, color: 'info.main' }} />
+                <Typography variant="h6">Depletion Risk</Typography>
+              </Box>
+              <Typography variant="h3" fontWeight="bold" color="info.main">
+                {depletionRisk.depletionRisk.toUpperCase()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {depletionRisk.monthsUntilCritical.toFixed(1)} months safe
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Charts Section */}
+      <Grid container spacing={4} sx={{ mb: 4 }}>
+        {/* Coverage Chart */}
+        <Grid item xs={12} lg={6}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Emergency Fund Coverage
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsPie>
+                  <Pie
+                    data={coverageData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {coverageData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip formatter={(value: any) => {
+                    const num = typeof value === 'number' ? value : Number(value);
+                    if (Number.isNaN(num)) return [String(value ?? ''), ''];
+                    return [`${num.toFixed(1)} months`, ''];
+                  }} />
+                </RechartsPie>
+              </ResponsiveContainer>
+              <Box sx={{ textAlign: 'center', mt: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Current: {status.monthsCoverage.toFixed(1)} months | Target: {status.targetMonths} months
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Simulation Chart */}
+        <Grid item xs={12} lg={6}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Emergency Scenarios Analysis
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsBar data={simulationData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="scenario" />
+                  <YAxis tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`} />
+                  <RechartsTooltip formatter={(value, name) => [
+                    name === 'required' ? `₹${value.toLocaleString()}` : `${value} months`,
+                    name === 'required' ? 'Required Amount' : 'Time to Build'
+                  ]} />
+                  <Bar dataKey="required" fill={theme.palette.error.main} name="required" />
+                  <Bar dataKey="timeToBuild" fill={theme.palette.warning.main} name="timeToBuild" />
+                </RechartsBar>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Alerts and Recommendations */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} lg={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Status & Alerts
+              </Typography>
+              <Alert
+                severity={status.status === 'excellent' || status.status === 'good' ? 'success' : 'warning'}
+                icon={getStatusIcon(status.status)}
+                sx={{ mb: 2 }}
+              >
+                <AlertTitle>Emergency Fund Status: {status.status.toUpperCase()}</AlertTitle>
+                {status.recommendedAction}
+              </Alert>
+
+              {status.alerts.length > 0 && (
+                <List dense>
+                  {status.alerts.map((alert, index) => (
+                    <ListItem key={index}>
+                      <ListItemIcon>
+                        <Warning color="error" />
+                      </ListItemIcon>
+                      <ListItemText primary={alert} />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} lg={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                AI Recommendations
+              </Typography>
+              <List dense>
+                {recommendations.map((rec, index) => (
+                  <ListItem key={index}>
+                    <ListItemIcon>
+                      <CheckCircle color="success" />
+                    </ListItemIcon>
+                    <ListItemText primary={rec} />
+                  </ListItem>
+                ))}
+              </List>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Optimal Contribution Plan */}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 3 }}>
+            Optimal Contribution Plan
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+                <Typography variant="h6" gutterBottom>
+                  Recommended Monthly Contribution
+                </Typography>
+                <Typography variant="h3" fontWeight="bold">
+                  ₹{optimalContribution.recommendedMonthly.toLocaleString()}
+                </Typography>
+                <Chip
+                  label={`Priority: ${optimalContribution.priority.toUpperCase()}`}
+                  color={optimalContribution.priority === 'critical' ? 'error' : 'warning'}
+                  sx={{ mt: 1 }}
+                />
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, bgcolor: 'success.light', color: 'success.contrastText' }}>
+                <Typography variant="h6" gutterBottom>
+                  Target Achievement
+                </Typography>
+                <Typography variant="h4" fontWeight="bold">
+                  ₹{optimalContribution.targetAmount.toLocaleString()}
+                </Typography>
+                <Typography variant="body2">
+                  Time to target: {optimalContribution.timeToTarget} months
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Emergency Scenarios Details */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 3 }}>
+            Emergency Scenarios Breakdown
+          </Typography>
+
+          <Grid container spacing={2}>
+            {simulations.map((sim, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Paper sx={{ p: 2, height: '100%' }}>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                    {sim.scenario}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Required: ₹{sim.requiredAmount.toLocaleString()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Shortfall: ₹{sim.currentShortfall.toLocaleString()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Build time: {sim.timeToBuild} months
+                  </Typography>
+                  <Typography variant="body2" color="primary" sx={{ mt: 1 }}>
+                    Monthly: ₹{sim.monthlyContribution.toLocaleString()}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </CardContent>
+      </Card>
+    </Container>
+  );
+}

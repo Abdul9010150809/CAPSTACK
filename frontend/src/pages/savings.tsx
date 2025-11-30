@@ -1,0 +1,394 @@
+/* eslint-disable react/no-unescaped-entities */
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Box,
+  Grid,
+  LinearProgress,
+  Chip,
+  Stack,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Alert,
+  CircularProgress,
+  IconButton,
+  Tooltip
+} from '@mui/material';
+import {
+  Lock,
+  LockOpen,
+  Add,
+  TrendingUp,
+  AccountBalance,
+  Savings as SavingsIcon,
+  Refresh
+} from '@mui/icons-material';
+// Navigation provided globally by _app.tsx
+import api from '@/utils/axiosClient';
+
+interface SavingsPlan {
+  id: number;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  monthly_contribution: number;
+  lock_percentage: number;
+  target_date: string;
+}
+
+interface SavingsData {
+  totalSaved: number;
+  locked: number;
+  available: number;
+  monthlyAutoSave: number;
+  disciplineScore: number;
+  plans: SavingsPlan[];
+}
+
+export default function Savings() {
+  const [data, setData] = useState<SavingsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lockDialogOpen, setLockDialogOpen] = useState(false);
+  const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SavingsPlan | null>(null);
+  const [lockAmount, setLockAmount] = useState('');
+
+  const fetchSavingsData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get(`/savings/status`);
+      setData(response.data);
+    } catch (err) {
+      const e: any = err;
+      if (e?.response?.status === 401) {
+        setError('Please sign in');
+      } else {
+        console.error('Failed to fetch savings data:', err);
+        setError('Failed to load savings data. Please check if the backend is running.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavingsData();
+  }, []);
+
+  const handleLockSavings = async () => {
+    if (!selectedPlan || !lockAmount) return;
+
+    try {
+      await api.post(`/savings/lock`, {
+        planId: selectedPlan.id,
+        amount: parseFloat(lockAmount)
+      });
+      setLockDialogOpen(false);
+      setLockAmount('');
+      fetchSavingsData(); // Refresh data
+    } catch (err) {
+      const e: any = err;
+      if (e?.response?.status === 401) {
+        setError('Please sign in');
+      } else {
+        console.error('Failed to lock savings:', err);
+      }
+    }
+  };
+
+  const handleUnlockSavings = async (planId: number) => {
+    try {
+      await api.post(`/savings/unlock`, {
+        planId
+      });
+      fetchSavingsData(); // Refresh data
+    } catch (err) {
+      const e: any = err;
+      if (e?.response?.status === 401) {
+        setError('Please sign in');
+      } else {
+        console.error('Failed to unlock savings:', err);
+      }
+    }
+  };
+
+  const openLockDialog = (plan: SavingsPlan) => {
+    setSelectedPlan(plan);
+    setLockDialogOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <Box textAlign="center">
+          <CircularProgress size={60} sx={{ mb: 2 }} />
+          <Typography variant="h6">Loading your savings data...</Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity={error === 'Please sign in' ? 'warning' : 'error'} sx={{ mb: 4 }}>
+          <Typography variant="h6">{error === 'Please sign in' ? 'Authentication Required' : 'Connection Error'}</Typography>
+          <Typography>{error}</Typography>
+          {error !== 'Please sign in' && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Make sure the backend API is running on {process.env.NEXT_PUBLIC_BACKEND_URL}
+            </Typography>
+          )}
+        </Alert>
+        <Box textAlign="center">
+          <Button variant="contained" onClick={fetchSavingsData}>
+            Retry
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!data) return null;
+
+  return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 2 }}>
+            Savings Management Center
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Automate your savings discipline with AI-powered locking mechanisms and goal tracking
+          </Typography>
+        </Box>
+
+        {/* Summary Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'success.light', color: 'success.contrastText' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <AccountBalance sx={{ mr: 1 }} />
+                  <Typography variant="h6">Total Saved</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  ₹{data.totalSaved.toLocaleString()}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Lock sx={{ mr: 1 }} />
+                  <Typography variant="h6">Locked Amount</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  ₹{data.locked.toLocaleString()}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'warning.light', color: 'warning.contrastText' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <SavingsIcon sx={{ mr: 1 }} />
+                  <Typography variant="h6">Available</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  ₹{data.available.toLocaleString()}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'info.light', color: 'info.contrastText' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <TrendingUp sx={{ mr: 1 }} />
+                  <Typography variant="h6">Monthly Auto-Save</Typography>
+                </Box>
+                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  ₹{data.monthlyAutoSave.toLocaleString()}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Discipline Score */}
+        <Paper sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            Savings Discipline Score
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <LinearProgress
+                variant="determinate"
+                value={data.disciplineScore}
+                sx={{ height: 10, borderRadius: 5 }}
+                color={data.disciplineScore >= 80 ? 'success' : data.disciplineScore >= 60 ? 'warning' : 'error'}
+              />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', minWidth: 60 }}>
+              {data.disciplineScore}%
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            {data.disciplineScore >= 80 ? 'Excellent discipline! Keep it up!' :
+             data.disciplineScore >= 60 ? 'Good progress. Room for improvement.' :
+             'Needs attention. Consider strengthening your savings habits.'}
+          </Typography>
+        </Paper>
+
+        {/* Savings Plans */}
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              Your Savings Plans
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <Button startIcon={<Refresh />} onClick={fetchSavingsData} size="small">
+                Refresh
+              </Button>
+              <Button variant="contained" startIcon={<Add />}>
+                Create New Plan
+              </Button>
+            </Stack>
+          </Box>
+
+          <Grid container spacing={3}>
+            {data.plans && data.plans.length > 0 ? (
+              data.plans.map((plan) => {
+                const progress = (plan.current_amount / plan.target_amount) * 100;
+                const lockedAmount = plan.current_amount * (plan.lock_percentage / 100);
+
+                return (
+                  <Grid item xs={12} md={6} key={plan.id}>
+                    <Card sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {plan.name}
+                          </Typography>
+                          <Chip
+                            label={`${Math.round(progress)}% Complete`}
+                            color={progress >= 100 ? 'success' : progress >= 75 ? 'primary' : 'default'}
+                            size="small"
+                          />
+                        </Box>
+
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Progress: ₹{plan.current_amount.toLocaleString()} / ₹{plan.target_amount.toLocaleString()}
+                          </Typography>
+                          <LinearProgress
+                            variant="determinate"
+                            value={Math.min(progress, 100)}
+                            sx={{ height: 8, borderRadius: 4, mb: 1 }}
+                          />
+                        </Box>
+
+                        <Stack spacing={1} sx={{ mb: 3 }}>
+                          <Typography variant="body2">
+                            <strong>Monthly Contribution:</strong> ₹{plan.monthly_contribution.toLocaleString()}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Lock Percentage:</strong> {plan.lock_percentage}%
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Locked Amount:</strong> ₹{lockedAmount.toLocaleString()}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Target Date:</strong> {new Date(plan.target_date).toLocaleDateString()}
+                          </Typography>
+                        </Stack>
+
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<Lock />}
+                            onClick={() => openLockDialog(plan)}
+                            disabled={plan.current_amount <= lockedAmount}
+                          >
+                            Lock More
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<LockOpen />}
+                            onClick={() => handleUnlockSavings(plan.id)}
+                            disabled={lockedAmount === 0}
+                          >
+                            Unlock
+                          </Button>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })
+            ) : (
+              <Grid item xs={12}>
+                <Paper sx={{ p: 4, textAlign: 'center' }}>
+                  <SavingsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No Savings Plans Yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Create your first savings plan to start building your financial security.
+                  </Typography>
+                  <Button variant="contained" startIcon={<Add />}>
+                    Create Your First Plan
+                  </Button>
+                </Paper>
+              </Grid>
+            )}
+          </Grid>
+        </Box>
+
+        {/* Lock Savings Dialog */}
+        <Dialog open={lockDialogOpen} onClose={() => setLockDialogOpen(false)}>
+          <DialogTitle>Lock Additional Savings</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Lock additional savings in "{selectedPlan?.name}" to prevent impulsive spending.
+            </Typography>
+            <TextField
+              autoFocus
+              label="Amount to Lock (₹)"
+              type="number"
+              fullWidth
+              value={lockAmount}
+              onChange={(e) => setLockAmount(e.target.value)}
+              helperText={`Available to lock: ₹${selectedPlan ? (selectedPlan.current_amount - (selectedPlan.current_amount * selectedPlan.lock_percentage / 100)).toLocaleString() : 0}`}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setLockDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleLockSavings} variant="contained">
+              Lock Savings
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+  );
+}

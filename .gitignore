@@ -1,0 +1,93 @@
+# =====================================================
+# Full Stack Project .gitignore (Node + Next.js + Docker)
+# =====================================================
+
+# ---------------------------
+# NODE MODULES
+# ---------------------------
+node_modules/
+backend-api/node_modules/
+frontend/node_modules/
+*/node_modules/
+
+# ---------------------------
+# TYPESCRIPT BUILD
+# ---------------------------
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+backend-api/dist/
+frontend/dist/
+
+# ---------------------------
+# NEXT.JS BUILD FILES
+# ---------------------------
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+frontend/.vercel/
+
+# ---------------------------
+# ENVIRONMENT FILES
+# ---------------------------
+*.env
+*.env.*
+!*.env.example          # keep example env files
+
+backend-api/.env
+frontend/.env
+
+# ---------------------------
+# LOGS
+# ---------------------------
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------
+# DOCKER FILES
+# ---------------------------
+*.pid
+docker-data/
+docker-volume/
+infra/**/data/
+infra/**/logs/
+docker-compose.override.yml
+
+# ---------------------------
+# TEMP / CACHE
+# ---------------------------
+.cache/
+.tmp/
+temp/
+tmp/
+coverage/
+build/
+
+# ---------------------------
+# OS GENERATED FILES
+# ---------------------------
+.DS_Store
+Thumbs.db
+
+# ---------------------------
+# EDITOR SETTINGS
+# ---------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---------------------------
+# MISC
+# ---------------------------
+# ALLOW LOCK FILES — DO NOT IGNORE
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+.Dockerfile.swp
+venv/

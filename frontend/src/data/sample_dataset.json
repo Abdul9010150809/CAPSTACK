@@ -1,0 +1,15 @@
+{
+  "monthlyIncome": 4333.33,
+  "monthlyExpenses": 2583.33,
+  "savings": 18000,
+  "emergencyFund": 45000,
+  "investmentHistory": {
+    "sip": 2000,
+    "stocks": 12000,
+    "bonds": 4000
+  },
+  "trends": {
+    "income": [ { "date": "2025-01-01", "value": 4300 }, { "date": "2025-02-01", "value": 4400 } ],
+    "expenses": [ { "date": "2025-01-01", "value": 2500 }, { "date": "2025-02-01", "value": 2600 } ]
+  }
+}

@@ -1,0 +1,315 @@
+import { query } from '../config/db';
+import { logger } from '../utils/logger';
+
+export interface UserFinancialData {
+  userId: number;
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  emergencyFund: number;
+  debtAmount: number;
+  age: number;
+  riskTolerance: 'low' | 'medium' | 'high';
+  jobStability: number;
+  marketConditions: 'bull' | 'bear' | 'neutral';
+  inflationRate: number;
+}
+
+export interface AssetAllocationData {
+  userId: number;
+  sipPercentage: number;
+  stocksPercentage: number;
+  bondsPercentage: number;
+  lifestylePercentage: number;
+  emergencyFundPercentage: number;
+  sipAmount: number;
+  stocksAmount: number;
+  bondsAmount: number;
+  lifestyleAmount: number;
+  emergencyAmount: number;
+  reasoning: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface EmergencyFundData {
+  userId: number;
+  currentBalance: number;
+  targetMonths: number;
+  monthlyBurnRate: number;
+  monthsCoverage: number;
+  status: 'excellent' | 'good' | 'adequate' | 'insufficient' | 'critical';
+  recommendedAction: string;
+  alerts: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class DatabaseService {
+  /**
+   * Get user financial data from database
+   */
+  static async getUserFinancialData(userId: number): Promise<UserFinancialData | null> {
+    try {
+      const result = await query(`
+        SELECT
+          u.id as user_id,
+          COALESCE(up.monthly_income, 0) as monthly_income,
+          COALESCE(up.monthly_expenses, 0) as monthly_expenses,
+          COALESCE(up.emergency_fund_balance, 0) as emergency_fund,
+          COALESCE(up.total_debt, 0) as debt_amount,
+          COALESCE(up.age, 30) as age,
+          COALESCE(up.risk_tolerance, 'medium') as risk_tolerance,
+          COALESCE(up.job_stability_score, 5) as job_stability,
+          'neutral' as market_conditions,
+          6.0 as inflation_rate
+        FROM users u
+        LEFT JOIN user_profiles up ON u.id = up.user_id
+        WHERE u.id = $1
+      `, [userId]);
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      const row = result.rows[0];
+      return {
+        userId: row.user_id,
+        monthlyIncome: parseFloat(row.monthly_income),
+        monthlyExpenses: parseFloat(row.monthly_expenses),
+        emergencyFund: parseFloat(row.emergency_fund),
+        debtAmount: parseFloat(row.debt_amount),
+        age: parseInt(row.age),
+        riskTolerance: row.risk_tolerance,
+        jobStability: parseInt(row.job_stability),
+        marketConditions: row.market_conditions,
+        inflationRate: parseFloat(row.inflation_rate)
+      };
+    } catch (error) {
+      logger.error(`Failed to get user financial data for user ${userId}: ${error}`);
+      return null;
+    }
+  }
+
+  /**
+   * Save asset allocation data
+   */
+  static async saveAssetAllocation(data: AssetAllocationData): Promise<boolean> {
+    try {
+      await query(`
+        INSERT INTO asset_allocations (
+          user_id, sip_percentage, stocks_percentage, bonds_percentage,
+          lifestyle_percentage, emergency_fund_percentage, sip_amount,
+          stocks_amount, bonds_amount, lifestyle_amount, emergency_amount,
+          reasoning, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        ON CONFLICT (user_id)
+        DO UPDATE SET
+          sip_percentage = EXCLUDED.sip_percentage,
+          stocks_percentage = EXCLUDED.stocks_percentage,
+          bonds_percentage = EXCLUDED.bonds_percentage,
+          lifestyle_percentage = EXCLUDED.lifestyle_percentage,
+          emergency_fund_percentage = EXCLUDED.emergency_fund_percentage,
+          sip_amount = EXCLUDED.sip_amount,
+          stocks_amount = EXCLUDED.stocks_amount,
+          bonds_amount = EXCLUDED.bonds_amount,
+          lifestyle_amount = EXCLUDED.lifestyle_amount,
+          emergency_amount = EXCLUDED.emergency_amount,
+          reasoning = EXCLUDED.reasoning,
+          updated_at = EXCLUDED.updated_at
+      `, [
+        data.userId,
+        data.sipPercentage,
+        data.stocksPercentage,
+        data.bondsPercentage,
+        data.lifestylePercentage,
+        data.emergencyFundPercentage,
+        data.sipAmount,
+        data.stocksAmount,
+        data.bondsAmount,
+        data.lifestyleAmount,
+        data.emergencyAmount,
+        JSON.stringify(data.reasoning),
+        data.createdAt,
+        data.updatedAt
+      ]);
+
+      logger.info(`Saved asset allocation for user ${data.userId}`);
+      return true;
+    } catch (error) {
+      logger.error(`Failed to save asset allocation for user ${data.userId}: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Get asset allocation data
+   */
+  static async getAssetAllocation(userId: number): Promise<AssetAllocationData | null> {
+    try {
+      const result = await query(`
+        SELECT * FROM asset_allocations WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1
+      `, [userId]);
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      const row = result.rows[0];
+      return {
+        userId: row.user_id,
+        sipPercentage: parseFloat(row.sip_percentage),
+        stocksPercentage: parseFloat(row.stocks_percentage),
+        bondsPercentage: parseFloat(row.bonds_percentage),
+        lifestylePercentage: parseFloat(row.lifestyle_percentage),
+        emergencyFundPercentage: parseFloat(row.emergency_fund_percentage),
+        sipAmount: parseFloat(row.sip_amount),
+        stocksAmount: parseFloat(row.stocks_amount),
+        bondsAmount: parseFloat(row.bonds_amount),
+        lifestyleAmount: parseFloat(row.lifestyle_amount),
+        emergencyAmount: parseFloat(row.emergency_amount),
+        reasoning: JSON.parse(row.reasoning || '[]'),
+        createdAt: new Date(row.created_at),
+        updatedAt: new Date(row.updated_at)
+      };
+    } catch (error) {
+      logger.error(`Failed to get asset allocation for user ${userId}: ${error}`);
+      return null;
+    }
+  }
+
+  /**
+   * Save emergency fund data
+   */
+  static async saveEmergencyFundData(data: EmergencyFundData): Promise<boolean> {
+    try {
+      await query(`
+        INSERT INTO emergency_fund_monitoring (
+          user_id, current_balance, target_months, monthly_burn_rate,
+          months_coverage, status, recommended_action, alerts,
+          created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        ON CONFLICT (user_id)
+        DO UPDATE SET
+          current_balance = EXCLUDED.current_balance,
+          target_months = EXCLUDED.target_months,
+          monthly_burn_rate = EXCLUDED.monthly_burn_rate,
+          months_coverage = EXCLUDED.months_coverage,
+          status = EXCLUDED.status,
+          recommended_action = EXCLUDED.recommended_action,
+          alerts = EXCLUDED.alerts,
+          updated_at = EXCLUDED.updated_at
+      `, [
+        data.userId,
+        data.currentBalance,
+        data.targetMonths,
+        data.monthlyBurnRate,
+        data.monthsCoverage,
+        data.status,
+        data.recommendedAction,
+        JSON.stringify(data.alerts),
+        data.createdAt,
+        data.updatedAt
+      ]);
+
+      logger.info(`Saved emergency fund data for user ${data.userId}`);
+      return true;
+    } catch (error) {
+      logger.error(`Failed to save emergency fund data for user ${data.userId}: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Get emergency fund data
+   */
+  static async getEmergencyFundData(userId: number): Promise<EmergencyFundData | null> {
+    try {
+      const result = await query(`
+        SELECT * FROM emergency_fund_monitoring WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1
+      `, [userId]);
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      const row = result.rows[0];
+      return {
+        userId: row.user_id,
+        currentBalance: parseFloat(row.current_balance),
+        targetMonths: parseInt(row.target_months),
+        monthlyBurnRate: parseFloat(row.monthly_burn_rate),
+        monthsCoverage: parseFloat(row.months_coverage),
+        status: row.status,
+        recommendedAction: row.recommended_action,
+        alerts: JSON.parse(row.alerts || '[]'),
+        createdAt: new Date(row.created_at),
+        updatedAt: new Date(row.updated_at)
+      };
+    } catch (error) {
+      logger.error(`Failed to get emergency fund data for user ${userId}: ${error}`);
+      return null;
+    }
+  }
+
+  /**
+   * Update user financial profile
+   */
+  static async updateUserFinancialProfile(userId: number, data: Partial<UserFinancialData>): Promise<boolean> {
+    try {
+      const updates: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+
+      if (data.monthlyIncome !== undefined) {
+        updates.push(`monthly_income = $${paramIndex++}`);
+        values.push(data.monthlyIncome);
+      }
+      if (data.monthlyExpenses !== undefined) {
+        updates.push(`monthly_expenses = $${paramIndex++}`);
+        values.push(data.monthlyExpenses);
+      }
+      if (data.emergencyFund !== undefined) {
+        updates.push(`emergency_fund_balance = $${paramIndex++}`);
+        values.push(data.emergencyFund);
+      }
+      if (data.debtAmount !== undefined) {
+        updates.push(`total_debt = $${paramIndex++}`);
+        values.push(data.debtAmount);
+      }
+      if (data.age !== undefined) {
+        updates.push(`age = $${paramIndex++}`);
+        values.push(data.age);
+      }
+      if (data.riskTolerance !== undefined) {
+        updates.push(`risk_tolerance = $${paramIndex++}`);
+        values.push(data.riskTolerance);
+      }
+      if (data.jobStability !== undefined) {
+        updates.push(`job_stability_score = $${paramIndex++}`);
+        values.push(data.jobStability);
+      }
+
+      if (updates.length === 0) {
+        return true; // Nothing to update
+      }
+
+      updates.push(`updated_at = $${paramIndex++}`);
+      values.push(new Date());
+
+      values.push(userId); // Add userId at the end
+
+      const queryText = `
+        UPDATE user_profiles
+        SET ${updates.join(', ')}
+        WHERE user_id = $${paramIndex}
+      `;
+
+      await query(queryText, values);
+      logger.info(`Updated financial profile for user ${userId}`);
+      return true;
+    } catch (error) {
+      logger.error(`Failed to update financial profile for user ${userId}: ${error}`);
+      return false;
+    }
+  }
+}
