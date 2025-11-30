@@ -14,6 +14,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { useRouter } from 'next/router';
+import NextLink from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/utils/axiosClient';
 
@@ -109,8 +110,8 @@ export default function Login() {
             {loading ? <CircularProgress size={24} /> : 'Sign In'}
           </Button>
           <Box textAlign="center">
-            <Link href="/auth/register" variant="body2">
-              Don't have an account? Sign Up
+            <Link component={NextLink} href="/auth/register" variant="body2">
+              Don&apos;t have an account? Sign Up
             </Link>
           </Box>
         </Box>
