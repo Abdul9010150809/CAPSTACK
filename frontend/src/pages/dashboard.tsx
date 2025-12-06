@@ -160,30 +160,6 @@ export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
-  }, [isAuthenticated, authLoading, router]);
-
-  // Show loading while checking authentication
-  if (authLoading) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 4, textAlign: "center" }}>
-        <CircularProgress size={60} sx={{ mb: 2 }} />
-        <Typography variant="h6">Loading...</Typography>
-      </Container>
-    );
-  }
-
-  // Don't render dashboard if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
-
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
@@ -212,9 +188,34 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch dashboard data when user is authenticated.
   useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
     fetchDashboardData();
-  }, []);
+  }, [authLoading, isAuthenticated]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login');
+      return;
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, textAlign: "center" }}>
+        <CircularProgress size={60} sx={{ mb: 2 }} />
+        <Typography variant="h6">Loading...</Typography>
+      </Container>
+    );
+  }
+
+  // Don't render dashboard if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleRefresh = async () => {
     setRefreshing(true);

@@ -179,6 +179,19 @@ export default function Assessment() {
   const router = useRouter();
   const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
+  // Ensure hooks are declared unconditionally (fix rules-of-hooks)
+  const [result, setResult] = useState<AssessmentResult | null>(null);
+  const [data, setData] = useState<FinancialData>({
+    monthlyIncome: 0,
+    monthlyExpenses: 0,
+    emergencyFund: 0,
+    savings: 0,
+    debt: 0,
+    age: 25,
+    dependents: 0,
+    employmentType: 'salaried',
+    riskTolerance: 5
+  });
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -202,18 +215,6 @@ export default function Assessment() {
   if (!isAuthenticated) {
     return null;
   }
-  const [result, setResult] = useState<AssessmentResult | null>(null);
-  const [data, setData] = useState<FinancialData>({
-    monthlyIncome: 0,
-    monthlyExpenses: 0,
-    emergencyFund: 0,
-    savings: 0,
-    debt: 0,
-    age: 25,
-    dependents: 0,
-    employmentType: 'salaried',
-    riskTolerance: 5
-  });
 
   const calculateAssessment = () => {
     setLoading(true);
