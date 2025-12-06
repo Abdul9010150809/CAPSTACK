@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
-// TODO: Import user model functions
+import { DatabaseService } from '../services/databaseService';
 
 export const verify = async (req: Request, res: Response) => {
   try {
@@ -23,8 +23,10 @@ export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   // Dummy check
   if (email && password) {
-    const userId = 1;
     const name = (req.body.name as string) || 'User';
+    // Ensure the user exists in the database and get their id
+    const ensuredUserId = await DatabaseService.ensureUserExists(email, name);
+    const userId = ensuredUserId || 1;
     // Sign token with user info and expiry so frontend can validate `exp`
     const token = jwt.sign({ userId, email, name }, config.jwtSecret, { expiresIn: '7d' });
     res.json({ token, user: { id: userId.toString(), email, name } });

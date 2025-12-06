@@ -49,6 +49,22 @@ export class DatabaseService {
    * Get user financial data from database
    */
   static async getUserFinancialData(userId: number): Promise<UserFinancialData | null> {
+    // For demo user (userId 1), return mock data
+    if (userId === 1) {
+      return {
+        userId: 1,
+        monthlyIncome: 52000,
+        monthlyExpenses: 31000,
+        emergencyFund: 186000,
+        debtAmount: 50000,
+        age: 30,
+        riskTolerance: 'medium',
+        jobStability: 7,
+        marketConditions: 'neutral',
+        inflationRate: 6.0
+      };
+    }
+
     try {
       const result = await query(`
         SELECT
@@ -87,6 +103,32 @@ export class DatabaseService {
     } catch (error) {
       logger.error(`Failed to get user financial data for user ${userId}: ${error}`);
       return null;
+    }
+  }
+
+  /**
+   * Ensure a user row exists for the given email. If exists, return id, otherwise create and return new id.
+   */
+  static async ensureUserExists(email: string, name: string): Promise<number> {
+    try {
+      const result = await query(
+        `INSERT INTO users (email, name, created_at)
+         VALUES ($1, $2, NOW())
+         ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [email, name]
+      );
+
+      if (result.rows.length > 0) {
+        return result.rows[0].id;
+      }
+      // Fallback: try selecting
+      const sel = await query(`SELECT id FROM users WHERE email = $1 LIMIT 1`, [email]);
+      if (sel.rows.length > 0) return sel.rows[0].id;
+      return 0;
+    } catch (error) {
+      logger.error(`Failed to ensure user exists for email ${email}: ${error}`);
+      return 0;
     }
   }
 
