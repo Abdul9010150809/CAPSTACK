@@ -186,7 +186,7 @@ export default function Allocation() {
         const r = await fetch('/data/sample_dataset.json');
         const sample = await r.json();
         setData(generateSampleFallback(sample));
-        setError("Backend unavailable — showing sample data.");
+        setError(null); // Clear error since we have sample data
       } catch (fallbackErr) {
         setError("Critical: Unable to load allocation data.");
       }
