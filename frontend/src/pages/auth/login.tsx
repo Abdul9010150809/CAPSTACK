@@ -77,7 +77,7 @@ export default function Login() {
     setError('');
 
     try {
-      const response = await api.post('/auth/guest-login');
+      const response = await api.post('/auth/guest');
       const { token, user } = response.data;
 
       const userData = {
@@ -92,7 +92,8 @@ export default function Login() {
 
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Guest login failed');
+      console.error('Guest login error:', err);
+      setError(err.response?.data?.error || err.message || 'Guest login failed');
     } finally {
       setLoading(false);
     }
