@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
 // Create only ONE axios instance
 const api = axios.create({
@@ -7,11 +7,10 @@ const api = axios.create({
 });
 
 // Attach token automatically
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
     if (token) {
-      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
       // Debug: log that a token was attached (safe to remove later)
       // eslint-disable-next-line no-console
