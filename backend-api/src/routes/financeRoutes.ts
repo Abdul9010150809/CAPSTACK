@@ -34,9 +34,41 @@ router.get("/insights", requireAuthMiddleware, async (req, res) => {
 /* -------------------------------------------
    Asset Allocation Route (Advanced Feature)
 -------------------------------------------- */
-router.get("/asset-allocation", requireAuthMiddleware, async (req, res) => {
+router.get("/asset-allocation", optionalAuthMiddleware, async (req, res) => {
   try {
     const userId = (req as any).userId;
+    const isGuest = (req as any).isGuest;
+
+    // If guest or no user, return a demo allocation so the UI can render
+    if (!userId || isGuest) {
+      const guestInput = {
+        monthlyIncome: 52000,
+        monthlyExpenses: 31000,
+        emergencyFund: 186000,
+        debtAmount: 50000,
+        age: 30,
+        riskTolerance: "medium" as const,
+        jobStability: 7,
+        marketConditions: "neutral" as const,
+        inflationRate: 6.0,
+      };
+
+      const allocation = await AssetAllocationService.calculateOptimalAllocation(guestInput);
+
+      return res.json({
+        allocation: {
+          sipPercentage: allocation.sipPercentage,
+          stocksPercentage: allocation.stocksPercentage,
+          bondsPercentage: allocation.bondsPercentage,
+          lifestylePercentage: allocation.lifestylePercentage,
+          emergencyFundPercentage: allocation.emergencyFundPercentage,
+          allocatedAmounts: allocation.allocatedAmounts,
+          reasoning: allocation.reasoning,
+        },
+        isGuest: true,
+        note: "Demo allocation shown. Create an account to save your personalized plan.",
+      });
+    }
 
     const existingAllocation = await DatabaseService.getAssetAllocation(userId);
 

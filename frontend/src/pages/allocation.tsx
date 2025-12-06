@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import {
   Container,
   Typography,
@@ -148,11 +149,13 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 export default function Allocation() {
   const theme = useTheme();
+  const router = useRouter();
 
   const [data, setData] = useState<AllocationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [requiresRegistration, setRequiresRegistration] = useState(false);
 
   //
   // --------------------------- FETCH LOGIC ---------------------------
@@ -162,6 +165,7 @@ export default function Allocation() {
     try {
       setLoading(true);
       setError(null);
+      setRequiresRegistration(false);
 
       const response = await api.get('/finance/asset-allocation');
 
@@ -179,9 +183,17 @@ export default function Allocation() {
     } catch (err: any) {
       console.error("Asset Allocation API Failed:", err);
 
+      // Check if this is a 403 error requiring registration
+      if (err.response?.status === 403 && err.response?.data?.requiresRegistration) {
+        setRequiresRegistration(true);
+        setError("This advanced feature requires a full account. Please register with your email to access AI-powered asset allocation.");
+        setLoading(false);
+        return;
+      }
+
       setError(err.message || "Unknown backend error");
 
-      // Try sample.json
+      // Try sample.json only for non-auth errors
       try {
         const r = await fetch('/data/sample_dataset.json');
         const sample = await r.json();
@@ -225,15 +237,32 @@ export default function Allocation() {
   if (error) {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Alert severity={error.includes("sample") ? "warning" : "error"} sx={{ mb: 4 }}>
+        <Alert severity={requiresRegistration ? "info" : error.includes("sample") ? "warning" : "error"} sx={{ mb: 4 }}>
           <AlertTitle>
-            {error.includes("sample") ? "Using Sample Data" : "Backend Error"}
+            {requiresRegistration ? "Registration Required" : error.includes("sample") ? "Using Sample Data" : "Backend Error"}
           </AlertTitle>
           {error}
         </Alert>
 
         <Box textAlign="center">
-          <Button variant="contained" onClick={fetchAllocationData}>Retry</Button>
+          {requiresRegistration ? (
+            <Stack direction="row" spacing={2} justifyContent="center">
+              <Button
+                variant="contained"
+                onClick={() => router.push('/auth/register')}
+              >
+                Register for Full Access
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => router.push('/auth/login')}
+              >
+                Login
+              </Button>
+            </Stack>
+          ) : (
+            <Button variant="contained" onClick={fetchAllocationData}>Retry</Button>
+          )}
         </Box>
       </Container>
     );
