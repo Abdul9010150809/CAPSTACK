@@ -114,7 +114,7 @@ export default function Login() {
           >
             {loading ? <CircularProgress size={24} /> : 'Sign In'}
           </Button>
-          <Box textAlign="center">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Link href="/auth/register" variant="body2">
               <p>Don&apos;t have an account?</p>
             </Link>
