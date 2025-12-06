@@ -55,6 +55,28 @@ router.get("/asset-allocation", optionalAuthMiddleware, async (req, res) => {
 
       const allocation = await AssetAllocationService.calculateOptimalAllocation(guestInput);
 
+      const formulas = {
+        sipCagr: AssetAllocationService.calculateSipCagr(
+          allocation.allocatedAmounts.sip,
+          10,
+          12
+        ),
+        emergencyMonths: AssetAllocationService.calculateEmergencyFundMonths(
+          allocation.allocatedAmounts.emergency,
+          guestInput.monthlyExpenses
+        ),
+        debtToIncome: AssetAllocationService.calculateDebtToIncomeRatio(
+          guestInput.debtAmount,
+          guestInput.monthlyIncome * 12
+        ),
+        savingsRate: AssetAllocationService.calculateSavingsRate(
+          guestInput.monthlyIncome,
+          guestInput.monthlyExpenses
+        ),
+        investmentRiskScore: AssetAllocationService.calculateInvestmentRiskScore(allocation),
+        stabilityIndex: 70,
+      };
+
       return res.json({
         allocation: {
           sipPercentage: allocation.sipPercentage,
@@ -65,6 +87,7 @@ router.get("/asset-allocation", optionalAuthMiddleware, async (req, res) => {
           allocatedAmounts: allocation.allocatedAmounts,
           reasoning: allocation.reasoning,
         },
+        formulas,
         isGuest: true,
         note: "Demo allocation shown. Create an account to save your personalized plan.",
       });
