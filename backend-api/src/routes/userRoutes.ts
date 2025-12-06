@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { getProfile, updateProfile } from '../controllers/userController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { requireAuthMiddleware } from '../middleware/optionalAuthMiddleware';
 
 const router = Router();
 
-router.use(authMiddleware);
+router.use(requireAuthMiddleware);
 
 router.get('/profile', getProfile);
 router.put('/profile', updateProfile);

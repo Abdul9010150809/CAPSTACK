@@ -9,11 +9,11 @@ import {
   processTransaction,
   triggerAutoSave
 } from '../controllers/savingsController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { requireAuthMiddleware } from '../middleware/optionalAuthMiddleware';
 
 const router = Router();
 
-router.use(authMiddleware);
+router.use(requireAuthMiddleware);
 
 // Savings management
 router.post('/lock', lock);

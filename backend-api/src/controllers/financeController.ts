@@ -12,31 +12,40 @@ export const calculateFinance = async (req: Request, res: Response) => {
 
 export const getHealthScore = async (req: Request, res: Response) => {
   const userId = (req as any).userId;
-  const result = await calculateHealthScore(userId);
+  const isGuest = (req as any).isGuest;
+
+  // For guest users or when no user data is available, use mock data
+  const result = await calculateHealthScore(userId || 0);
   res.json({
     score: result.totalScore,
     grade: result.grade,
     categoryScores: result.categoryScores,
     insights: result.insights,
-    recommendations: result.recommendations
+    recommendations: result.recommendations,
+    isGuest: isGuest || false
   });
 };
 
 export const getSurvival = async (req: Request, res: Response) => {
   const userId = (req as any).userId;
-  const result = await calculateSurvivalMonths(userId);
+  const isGuest = (req as any).isGuest;
+
+  const result = await calculateSurvivalMonths(userId || 0);
   res.json({
     months: result.months,
     riskLevel: result.riskLevel,
     breakdown: result.breakdown,
     scenarios: result.scenarios,
-    recommendations: result.recommendations
+    recommendations: result.recommendations,
+    isGuest: isGuest || false
   });
 };
 
 export const getIncomeScore = async (req: Request, res: Response) => {
   const userId = (req as any).userId;
-  const result = await calculateIncomeSuitabilityScore(userId);
+  const isGuest = (req as any).isGuest;
+
+  const result = await calculateIncomeSuitabilityScore(userId || 0);
   res.json({
     score: result.totalScore,
     grade: result.grade,
@@ -44,6 +53,7 @@ export const getIncomeScore = async (req: Request, res: Response) => {
     categoryScores: result.categoryScores,
     insights: result.insights,
     recommendations: result.recommendations,
-    projections: result.projections
+    projections: result.projections,
+    isGuest: isGuest || false
   });
 };

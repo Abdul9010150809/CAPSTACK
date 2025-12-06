@@ -52,12 +52,7 @@ export const guestLogin = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, pin } = req.body;
-    
-    // If no credentials provided, treat as guest login
-    if (!email && !pin) {
-      return guestLogin(req, res);
-    }
-    
+
     if (!email || !pin) {
       return res.status(400).json({ error: 'Email and PIN are required' });
     }
@@ -79,7 +74,7 @@ export const login = async (req: Request, res: Response) => {
       config.jwtSecret,
       { expiresIn: '7d' }
     );
-    
+
     return res.json({
       token,
       user: { id: user.id.toString(), email: user.email, name: user.name, isGuest: false }
@@ -118,7 +113,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { userId, email, name },
+      { userId, email, name, isGuest: false },
       config.jwtSecret,
       { expiresIn: '7d' }
     );
@@ -126,7 +121,7 @@ export const register = async (req: Request, res: Response) => {
     return res.json({
       message: 'User registered successfully',
       token,
-      user: { id: userId.toString(), email, name }
+      user: { id: userId.toString(), email, name, isGuest: false }
     });
   } catch (error: any) {
     console.error('Registration error:', error);

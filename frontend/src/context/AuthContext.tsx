@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import jwt from "jsonwebtoken";
-import api from '@/utils/axiosClient';
 
 type User = {
   id: string;
@@ -25,18 +24,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Check for existing token on app startup
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeAuth = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
+          // No token - user is not authenticated (but can continue as guest)
           setUser(null);
           setLoading(false);
           return;
         }
 
-        // Basic decode and expiry check
+        // Try to decode token
         const decoded = jwt.decode(token);
         if (!decoded || typeof decoded !== 'object' || !('exp' in decoded)) {
+          // Invalid token format
           localStorage.removeItem('token');
           setUser(null);
           setLoading(false);
@@ -45,25 +46,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const currentTime = Date.now() / 1000;
         if ((decoded as any).exp <= currentTime) {
-          // expired
+          // Token expired
           localStorage.removeItem('token');
           setUser(null);
           setLoading(false);
           return;
         }
 
-        // Token is valid locally, extract user data
+        // Token is valid - extract user info
         const payload = decoded as any;
-        const userData = {
-          id: payload.userId?.toString() || payload.id?.toString() || '1',
+        const userData: User = {
+          id: payload.userId?.toString() || '1',
           email: payload.email || null,
           name: payload.name || 'User',
           isGuest: payload.isGuest || false
         };
         setUser(userData);
       } catch (error) {
-        console.error("Auth initialization error:", error);
-        localStorage.removeItem("token");
+        console.error('Auth initialization error:', error);
+        localStorage.removeItem('token');
         setUser(null);
       } finally {
         setLoading(false);

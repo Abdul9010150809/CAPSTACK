@@ -13,33 +13,28 @@ import { generateComprehensiveInsights } from "../services/insightsService";
 import { AssetAllocationService } from "../services/assetAllocationService";
 import { EmergencyFundService } from "../services/emergencyFundService";
 import { DatabaseService } from "../services/databaseService";
-import { authMiddleware } from "../middleware/authMiddleware";
+import { optionalAuthMiddleware, requireAuthMiddleware } from "../middleware/optionalAuthMiddleware";
 
 const router = Router();
 
 /* -------------------------------------------
-   AUTH MUST BE FIRST for all finance routes
+   Basic finance routes (allow guest access)
 -------------------------------------------- */
-router.use(authMiddleware);
+router.post("/calculate", optionalAuthMiddleware, calculateFinance);
+router.get("/healthscore", optionalAuthMiddleware, getHealthScore);
+router.get("/survival", optionalAuthMiddleware, getSurvival);
+router.get("/incomescore", optionalAuthMiddleware, getIncomeScore);
 
-/* -------------------------------------------
-   Existing finance routes
--------------------------------------------- */
-router.post("/calculate", calculateFinance);
-router.get("/healthscore", getHealthScore);
-router.get("/survival", getSurvival);
-router.get("/incomescore", getIncomeScore);
-
-router.get("/insights", async (req, res) => {
+router.get("/insights", requireAuthMiddleware, async (req, res) => {
   const userId = (req as any).userId;
   const result = await generateComprehensiveInsights(userId);
   res.json(result);
 });
 
 /* -------------------------------------------
-   Asset Allocation Route
+   Asset Allocation Route (Advanced Feature)
 -------------------------------------------- */
-router.get("/asset-allocation", async (req, res) => {
+router.get("/asset-allocation", requireAuthMiddleware, async (req, res) => {
   try {
     const userId = (req as any).userId;
 
@@ -172,9 +167,9 @@ router.get("/asset-allocation", async (req, res) => {
 });
 
 /* -------------------------------------------
-   Update Asset Allocation
+   Update Asset Allocation (Advanced Feature)
 -------------------------------------------- */
-router.post("/asset-allocation/update", async (req, res) => {
+router.post("/asset-allocation/update", requireAuthMiddleware, async (req, res) => {
   try {
     const userId = (req as any).userId;
     const { allocation } = req.body;
@@ -219,9 +214,9 @@ router.post("/asset-allocation/update", async (req, res) => {
 });
 
 /* -------------------------------------------
-   Emergency Fund Routes
+   Emergency Fund Routes (Advanced Feature)
 -------------------------------------------- */
-router.get("/emergency-status", async (req, res) => {
+router.get("/emergency-status", requireAuthMiddleware, async (req, res) => {
   try {
     const userId = (req as any).userId;
 
@@ -343,7 +338,7 @@ router.get("/emergency-status", async (req, res) => {
   }
 });
 
-router.post("/emergency-simulation", async (req, res) => {
+router.post("/emergency-simulation", requireAuthMiddleware, async (req, res) => {
   try {
     const { scenario, currentBalance, monthlyExpenses, monthlyIncome } =
       req.body;
@@ -367,9 +362,9 @@ router.post("/emergency-simulation", async (req, res) => {
 });
 
 /* -------------------------------------------
-   Trend Analysis
+   Trend Analysis (Advanced Feature)
 -------------------------------------------- */
-router.get("/trends/:period", async (req, res) => {
+router.get("/trends/:period", requireAuthMiddleware, async (req, res) => {
   try {
     const userId = (req as any).userId;
     const { period } = req.params;
@@ -426,9 +421,9 @@ router.post("/sip-plan", async (req, res) => {
 });
 
 /* -------------------------------------------
-   Notification Routes
+   Notification Routes (Advanced Feature)
 -------------------------------------------- */
-router.post("/notify/alert", async (req, res) => {
+router.post("/notify/alert", requireAuthMiddleware, async (req, res) => {
   try {
     const { email, message, type } = req.body;
     const userId = (req as any).userId;
@@ -440,7 +435,7 @@ router.post("/notify/alert", async (req, res) => {
   }
 });
 
-router.post("/notify/achievement", async (req, res) => {
+router.post("/notify/achievement", requireAuthMiddleware, async (req, res) => {
   try {
     const { email, achievement, details } = req.body;
     const userId = (req as any).userId;

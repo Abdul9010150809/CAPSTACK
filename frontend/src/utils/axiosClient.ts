@@ -34,33 +34,32 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
 
-    // If token is missing or expired, clear and redirect to login
-    if (!token || isTokenExpired(token)) {
-      try { localStorage.removeItem('token'); } catch (e) {}
-      // avoid redirect loop if on auth pages
-      const pathname = window.location.pathname;
-      if (!pathname.startsWith('/auth')) {
-        window.location.href = '/auth/login';
-      }
-      // Reject the request to avoid sending an invalid token
-      return Promise.reject(new Error('Token missing or expired'));
+    // Attach token if available (even if expired - let backend validate)
+    if (token) {
+      // Attach valid token (normalize if it accidentally contains a 'Bearer ' prefix)
+      const rawToken = token.startsWith('Bearer ') ? token.slice(7) : token;
+      config.headers = config.headers || ({} as any);
+      (config.headers as Record<string, string>).Authorization = `Bearer ${rawToken}`;
     }
-
-    // Attach valid token (normalize if it accidentally contains a 'Bearer ' prefix)
-    const rawToken = token.startsWith('Bearer ') ? token.slice(7) : token;
-    config.headers = config.headers || ({} as any);
-    (config.headers as Record<string, string>).Authorization = `Bearer ${rawToken}`;
   }
   return config;
 });
 
-// Response interceptor to log 401s for debugging
+// Response interceptor to handle 401s and redirect to login
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     try {
       if (error?.response?.status === 401) {
-        // Token already handled in request interceptor
+        // Clear invalid token
+        try { localStorage.removeItem('token'); } catch (e) {}
+        // Redirect to login if not already there
+        if (typeof window !== "undefined") {
+          const pathname = window.location.pathname;
+          if (!pathname.startsWith('/auth')) {
+            window.location.href = '/auth/login';
+          }
+        }
       }
     } catch (e) {
       // ignore logging errors
