@@ -75,6 +75,11 @@ export const register = async (req: Request, res: Response) => {
 
     // Create new user with PIN
     const userId = await DatabaseService.createUserWithPin(email, name, pin);
+    
+    if (!userId || userId === 0) {
+      console.error('Failed to create user - userId is 0 or null');
+      return res.status(500).json({ error: 'Failed to create user account. Please try again.' });
+    }
 
     const token = jwt.sign(
       { userId, email, name },
@@ -89,6 +94,9 @@ export const register = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Registration error:', error);
-    return res.status(500).json({ error: 'Registration failed. Please try again.' });
+    return res.status(500).json({ 
+      error: 'Registration failed. Please try again.',
+      details: error.message 
+    });
   }
 };

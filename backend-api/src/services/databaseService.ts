@@ -161,15 +161,19 @@ export class DatabaseService {
    */
   static async createUserWithPin(email: string, name: string, pin: string): Promise<number> {
     try {
+      logger.info(`Creating user with email: ${email}, name: ${name}, pin length: ${pin.length}`);
+      
       const result = await query(
-        `INSERT INTO users (email, name, pin, created_at)
-         VALUES ($1, $2, $3, NOW())
+        `INSERT INTO users (email, name, pin, created_at, updated_at)
+         VALUES ($1, $2, $3, NOW(), NOW())
          RETURNING id`,
         [email, name, pin]
       );
 
       if (result.rows.length > 0) {
         const userId = result.rows[0].id;
+        logger.info(`User created successfully with id: ${userId}`);
+        
         // Create default user profile
         try {
           await query(
@@ -178,15 +182,19 @@ export class DatabaseService {
              ON CONFLICT (user_id) DO NOTHING`,
             [userId]
           );
+          logger.info(`User profile created for user ${userId}`);
         } catch (e) {
           logger.error(`Failed to create user_profile for user ${userId}: ${e}`);
+          // Don't fail the registration if profile creation fails
         }
         return userId;
       }
+      logger.error('No rows returned after user insert');
       return 0;
-    } catch (error) {
-      logger.error(`Failed to create user with PIN for email ${email}: ${error}`);
-      return 0;
+    } catch (error: any) {
+      logger.error(`Failed to create user with PIN for email ${email}: ${error.message || error}`);
+      console.error('Full error:', error);
+      throw error;
     }
   }
 
