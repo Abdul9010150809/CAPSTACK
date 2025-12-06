@@ -120,7 +120,20 @@ export class DatabaseService {
       );
 
       if (result.rows.length > 0) {
-        return result.rows[0].id;
+        const userId = result.rows[0].id;
+        // Ensure a user_profiles row exists with default values so finance endpoints can operate
+        try {
+          await query(
+            `INSERT INTO user_profiles (user_id, monthly_income, monthly_expenses, emergency_fund_balance, total_debt, age, risk_tolerance, job_stability_score, created_at, updated_at)
+             VALUES ($1, 0, 0, 0, 0, 30, 'medium', 5, NOW(), NOW())
+             ON CONFLICT (user_id) DO NOTHING`,
+            [userId]
+          );
+        } catch (e) {
+          logger.error(`Failed to ensure user_profile for user ${userId}: ${e}`);
+        }
+
+        return userId;
       }
       // Fallback: try selecting
       const sel = await query(`SELECT id FROM users WHERE email = $1 LIMIT 1`, [email]);

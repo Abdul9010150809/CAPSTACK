@@ -28,8 +28,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          // No token, auto-login with demo
-          await autoLoginDemo();
+          setUser(null);
+          setLoading(false);
           return;
         }
 
@@ -37,7 +37,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const decoded = jwt.decode(token);
         if (!decoded || typeof decoded !== 'object' || !('exp' in decoded)) {
           localStorage.removeItem('token');
-          await autoLoginDemo();
+          setUser(null);
+          setLoading(false);
           return;
         }
 
@@ -45,7 +46,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if ((decoded as any).exp <= currentTime) {
           // expired
           localStorage.removeItem('token');
-          await autoLoginDemo();
+          setUser(null);
+          setLoading(false);
           return;
         }
 
@@ -64,38 +66,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Verification failed server-side
           console.warn('Token verification failed:', e);
           localStorage.removeItem('token');
-          await autoLoginDemo();
+          setUser(null);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
         localStorage.removeItem("token");
-        await autoLoginDemo();
+        setUser(null);
       } finally {
         setLoading(false);
-      }
-    };
-
-    const autoLoginDemo = async () => {
-      try {
-        const response = await api.post('/auth/login', {
-          email: 'demo@capstack.com',
-          password: 'demo123'
-        });
-        const { token, user } = response.data;
-        localStorage.setItem("token", token);
-        setUser({
-          id: user.id?.toString() || "demo",
-          email: user.email || "demo@capstack.com",
-          name: user.name || "Demo User"
-        });
-      } catch (error) {
-        console.error("Demo login failed:", error);
-        // Fallback to mock user if login fails
-        setUser({
-          id: "demo",
-          email: "demo@capstack.com",
-          name: "Demo User"
-        });
       }
     };
 
