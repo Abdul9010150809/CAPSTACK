@@ -66,22 +66,24 @@ export class DatabaseService {
     }
 
     try {
-      const result = await query(`
-        SELECT
-          u.id as user_id,
-          COALESCE(up.monthly_income, 0) as monthly_income,
-          COALESCE(up.monthly_expenses, 0) as monthly_expenses,
-          COALESCE(up.emergency_fund_balance, 0) as emergency_fund,
-          COALESCE(up.total_debt, 0) as debt_amount,
-          COALESCE(up.age, 30) as age,
-          COALESCE(up.risk_tolerance, 'medium') as risk_tolerance,
-          COALESCE(up.job_stability_score, 5) as job_stability,
-          'neutral' as market_conditions,
-          6.0 as inflation_rate
-        FROM users u
-        LEFT JOIN user_profiles up ON u.id = up.user_id
-        WHERE u.id = $1
-      `, [userId]);
+        // Note: align selected columns with current DB schema (user_profiles columns)
+        const result = await query(`
+          SELECT
+            u.id as user_id,
+            COALESCE(up.monthly_income, 0) as monthly_income,
+            COALESCE(up.monthly_expenses, 0) as monthly_expenses,
+            COALESCE(up.emergency_fund, 0) as emergency_fund,
+            -- total debt aggregated from debts table if present
+            COALESCE((SELECT SUM(outstanding_amount) FROM debts WHERE user_id = $1), 0) as debt_amount,
+            COALESCE(up.experience_years, 30) as age,
+            COALESCE(up.savings_rate, 0.0) as risk_tolerance,
+            COALESCE(5, 5) as job_stability,
+            'neutral' as market_conditions,
+            6.0 as inflation_rate
+          FROM users u
+          LEFT JOIN user_profiles up ON u.id = up.user_id
+          WHERE u.id = $1
+        `, [userId]);
 
       if (result.rows.length === 0) {
         return null;
@@ -124,8 +126,8 @@ export class DatabaseService {
         // Ensure a user_profiles row exists with default values so finance endpoints can operate
         try {
           await query(
-            `INSERT INTO user_profiles (user_id, monthly_income, monthly_expenses, emergency_fund_balance, total_debt, age, risk_tolerance, job_stability_score, created_at, updated_at)
-             VALUES ($1, 0, 0, 0, 0, 30, 'medium', 5, NOW(), NOW())
+            `INSERT INTO user_profiles (user_id, monthly_income, monthly_expenses, emergency_fund, savings_rate, experience_years, created_at, updated_at)
+             VALUES ($1, 0, 0, 0, 0.0, 30, NOW(), NOW())
              ON CONFLICT (user_id) DO NOTHING`,
             [userId]
           );
