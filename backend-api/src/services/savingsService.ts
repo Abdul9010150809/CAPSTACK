@@ -182,8 +182,18 @@ export const getSavingsStatus = async (userId: number) => {
   }
 };
 
-export const createSavingsPlan = async (userId: number, plan: Omit<SavingsPlan, 'id' | 'userId' | 'createdAt'>) => {
+export const createSavingsPlan = async (userId: number, plan: any) => {
   try {
+    // Convert snake_case from frontend to the format we need
+    const planData = {
+      name: plan.name || plan.name,
+      targetAmount: plan.target_amount ?? plan.targetAmount ?? 0,
+      currentAmount: plan.current_amount ?? plan.currentAmount ?? 0,
+      monthlyContribution: plan.monthly_contribution ?? plan.monthlyContribution ?? 0,
+      lockPercentage: (plan.lock_percentage ?? plan.lockPercentage ?? 80) / 100, // Convert percentage to decimal
+      targetDate: plan.target_date || plan.targetDate || null
+    };
+
     const result = await query(`
       INSERT INTO savings_plans (
         user_id,
@@ -198,16 +208,16 @@ export const createSavingsPlan = async (userId: number, plan: Omit<SavingsPlan, 
       RETURNING id, name, target_amount, current_amount, monthly_contribution, lock_percentage, target_date, created_at
     `, [
       userId,
-      plan.name,
-      plan.targetAmount || 0,
-      plan.currentAmount || 0,
-      plan.monthlyContribution || 0,
-      plan.lockPercentage || 0,
-      plan.targetDate || null
+      planData.name,
+      planData.targetAmount,
+      planData.currentAmount,
+      planData.monthlyContribution,
+      planData.lockPercentage,
+      planData.targetDate
     ]);
 
     const newPlan = result.rows[0];
-    logger.info(`Created savings plan "${plan.name}" for user ${userId}`);
+    logger.info(`Created savings plan "${planData.name}" for user ${userId}`);
 
     return {
       success: true,
@@ -220,7 +230,7 @@ export const createSavingsPlan = async (userId: number, plan: Omit<SavingsPlan, 
         lock_percentage: parseFloat(newPlan.lock_percentage),
         target_date: newPlan.target_date
       },
-      autoLockScheduled: (plan.lockPercentage || 0) > 0
+      autoLockScheduled: planData.lockPercentage > 0
     };
   } catch (error) {
     logger.error(`Failed to create savings plan for user ${userId}: ${error}`);
