@@ -1,0 +1,17 @@
+{
+  "name": "CAPSTACK - AI-Powered Personal Finance Platform",
+  "short_name": "CAPSTACK",
+  "description": "Intelligent financial health management system with AI insights",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007AF7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}
