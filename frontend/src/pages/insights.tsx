@@ -264,7 +264,7 @@ export default function Insights() {
                   Demo Mode – Create an Account for Personalized Insights
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 0.5 }}>
-                  You're viewing demo financial insights. Sign up to get personalized analysis of your actual financial data.
+                  You&apos;re viewing demo financial insights. Sign up to get personalized analysis of your actual financial data.
                 </Typography>
               </Box>
             </Alert>

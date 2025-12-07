@@ -156,6 +156,7 @@ export default function Dashboard() {
   const theme = useTheme();
   const router = useRouter();
   const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const isGuest = user && user.isGuest === true;
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -283,6 +284,15 @@ export default function Dashboard() {
           minHeight: "100vh"
         }}
       >
+        {isGuest && (
+          <Alert severity="warning" icon={<Warning />} sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }} action={<Button color="inherit" size="small" href="/auth/register" variant="contained">Create Account</Button>}>
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Demo Mode – Create an Account to Unlock Features</Typography>
+              <Typography variant="body2" sx={{ mt: 0.5 }}>You&apos;re currently viewing demo financial data. Create an account to get personalized recommendations based on your actual financial situation.</Typography>
+            </Box>
+          </Alert>
+        )}
+
         {/* HEADER */}
         <Box sx={{ mb: 6 }}>
           <Paper

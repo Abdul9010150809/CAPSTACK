@@ -228,6 +228,15 @@ export default function Emergency() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+      {isGuest && (
+        <Alert severity="warning" icon={<Warning />} sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }} action={<Button color="inherit" size="small" href="/auth/register" variant="contained">Create Account</Button>}>
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Demo Mode – Create an Account to Unlock Features</Typography>
+            <Typography variant="body2" sx={{ mt: 0.5 }}>You&apos;re currently viewing demo emergency fund data. Create an account to get personalized recommendations based on your actual financial situation.</Typography>
+          </Box>
+        </Alert>
+      )}
+
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Paper

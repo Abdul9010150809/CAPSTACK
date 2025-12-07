@@ -42,9 +42,11 @@ import {
   Shield,
   Refresh,
   CheckCircle,
-  Info
+  Info,
+  Warning
 } from '@mui/icons-material';
 
+import { useAuth } from '@/context/AuthContext';
 import api from '@/utils/axiosClient';
 
 interface AllocationData {
@@ -150,6 +152,8 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 export default function Allocation() {
   const theme = useTheme();
   const router = useRouter();
+  const { user } = useAuth();
+  const isGuest = !user || user.isGuest;
 
   const [data, setData] = useState<AllocationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -298,6 +302,15 @@ export default function Allocation() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+
+      {isGuest && (
+        <Alert severity="warning" icon={<Warning />} sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }} action={<Button color="inherit" size="small" href="/auth/register" variant="contained">Create Account</Button>}>
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Demo Mode – Create an Account to Unlock Features</Typography>
+            <Typography variant="body2" sx={{ mt: 0.5 }}>You&apos;re currently viewing demo asset allocation data. Create an account to get personalized recommendations based on your actual financial profile.</Typography>
+          </Box>
+        </Alert>
+      )}
 
       {/* ---------------- HEADER ---------------- */}
       <Box sx={{ mb: 4 }}>
