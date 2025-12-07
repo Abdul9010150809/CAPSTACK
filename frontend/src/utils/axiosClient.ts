@@ -2,7 +2,7 @@ import axios, { type InternalAxiosRequestConfig } from "axios";
 
 // Create only ONE axios instance
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "https://capstack-2k25-backend.onrender.com" || "http://localhost:3001",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "https://capstack-2k25-backend.onrender.com",
   withCredentials: true,
 });
 

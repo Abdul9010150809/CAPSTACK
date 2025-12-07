@@ -171,6 +171,7 @@ export default function Allocation() {
       setError(null);
       setRequiresRegistration(false);
 
+      console.log('Fetching allocation from:', api.defaults.baseURL + '/finance/asset-allocation');
       const response = await api.get('/finance/asset-allocation');
 
       // Backend returned an error format
@@ -186,6 +187,13 @@ export default function Allocation() {
       setData(response.data);
     } catch (err: any) {
       console.error("Asset Allocation API Failed:", err);
+      console.error("Error details:", {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        url: err.config?.url,
+        baseURL: err.config?.baseURL,
+        message: err.message,
+      });
 
       // Check if this is a 403 error requiring registration
       if (err.response?.status === 403 && err.response?.data?.requiresRegistration) {

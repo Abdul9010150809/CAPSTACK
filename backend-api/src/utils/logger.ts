@@ -31,7 +31,16 @@ const writeLog = (level: string, data: any): void => {
   fs.appendFileSync(allLogsFile, message + '\n', { encoding: 'utf8' });
   // Also log to console in development
   if (process.env.NODE_ENV !== 'production') {
-    console[level.toLowerCase() as keyof typeof console](message);
+    const logLevel = level.toLowerCase();
+    if (logLevel === 'error') {
+      console.error(message);
+    } else if (logLevel === 'warn') {
+      console.warn(message);
+    } else if (logLevel === 'debug') {
+      console.debug(message);
+    } else {
+      console.log(message);
+    }
   }
 };
 
