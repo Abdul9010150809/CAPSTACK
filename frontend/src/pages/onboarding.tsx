@@ -59,11 +59,39 @@ export default function Onboarding() {
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
-  // 🔥 CLEAN + FIXED SUBMIT HANDLER
+  // 🔥 CLEAN + FIXED SUBMIT HANDLER with VALIDATION
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    // Validate required fields
+    if (!formData.name || !formData.email) {
+      setError("Please fill in all required fields (Name, Email).");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.monthlyIncome || !formData.monthlyExpenses) {
+      setError("Please fill in Income and Expenses to continue.");
+      setLoading(false);
+      return;
+    }
+
+    const monthlyIncome = parseFloat(formData.monthlyIncome);
+    const monthlyExpenses = parseFloat(formData.monthlyExpenses);
+    
+    if (monthlyIncome <= 0 || monthlyExpenses < 0) {
+      setError("Income must be positive and expenses cannot be negative.");
+      setLoading(false);
+      return;
+    }
+
+    if (monthlyExpenses > monthlyIncome) {
+      setError("Monthly expenses cannot exceed monthly income.");
+      setLoading(false);
+      return;
+    }
 
     const token = localStorage.getItem("token");
     if (!token) {

@@ -171,29 +171,38 @@ export default function Allocation() {
       setError(null);
       setRequiresRegistration(false);
 
-      console.log('Fetching allocation from:', api.defaults.baseURL + '/finance/asset-allocation');
-      const response = await api.get('/finance/asset-allocation');
+      const backendUrl = api.defaults.baseURL || 'https://capstack-2k25-backend.onrender.com';
+      console.log('Fetching allocation from:', `${backendUrl}/finance/asset-allocation`);
+      
+      try {
+        const response = await api.get('/finance/asset-allocation');
 
-      // Backend returned an error format
-      if (response.data?.error || response.data?.message || response.data?.success === false) {
-        throw new Error(response.data.error || response.data.message || "Invalid backend response");
+        // Backend returned an error format
+        if (response.data?.error || response.data?.message || response.data?.success === false) {
+          throw new Error(response.data.error || response.data.message || "Invalid backend response");
+        }
+
+        // Validation failed
+        if (!isValidAllocationResponse(response.data)) {
+          throw new Error("Backend returned incomplete allocation data");
+        }
+
+        setData(response.data);
+      } catch (apiError: any) {
+        // Provide detailed error information
+        console.error("Asset Allocation API Error:", apiError);
+        console.error("Error details:", {
+          status: apiError.response?.status,
+          statusText: apiError.response?.statusText,
+          url: apiError.config?.url,
+          baseURL: apiError.config?.baseURL,
+          message: apiError.message,
+          responseData: apiError.response?.data,
+        });
+        throw apiError;
       }
-
-      // Validation failed
-      if (!isValidAllocationResponse(response.data)) {
-        throw new Error("Backend returned incomplete allocation data");
-      }
-
-      setData(response.data);
     } catch (err: any) {
       console.error("Asset Allocation API Failed:", err);
-      console.error("Error details:", {
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        url: err.config?.url,
-        baseURL: err.config?.baseURL,
-        message: err.message,
-      });
 
       // Check if this is a 403 error requiring registration
       if (err.response?.status === 403 && err.response?.data?.requiresRegistration) {
@@ -203,7 +212,14 @@ export default function Allocation() {
         return;
       }
 
-      setError(err.message || "Unknown backend error");
+      // Handle connection errors
+      if (err.code === 'ECONNABORTED' || err.code === 'ENOTFOUND' || err.message?.includes('timeout')) {
+        setError(`Connection Error: Unable to reach the backend server at ${api.defaults.baseURL || 'https://capstack-2k25-backend.onrender.com'}. The server may be starting up. Please try again in a moment.`);
+      } else if (err.response?.status >= 500) {
+        setError(`Server Error (${err.response?.status}): The backend server encountered an error. Please try again.`);
+      } else {
+        setError(err.message || `Unknown error occurred. Please ensure the backend is running at ${api.defaults.baseURL || 'https://capstack-2k25-backend.onrender.com'}`); 
+      }
 
       // Try sample.json only for non-auth errors
       try {
