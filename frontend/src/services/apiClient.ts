@@ -1,34 +1,45 @@
 import axios from 'axios';
 
-// Production backend: https://capstack-2k25-backend.onrender.com
-// Local development: http://localhost:3001
-let apiBaseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-// If no env variable, detect environment
-if (!apiBaseURL && typeof window !== "undefined") {
-  if (window.location.hostname === "localhost") {
-    apiBaseURL = "http://localhost:3001";
-  } else {
-    apiBaseURL = "https://capstack-2k25-backend.onrender.com";
+// Determine backend URL based on environment
+function getApiBackendUrl(): string {
+  // 1. Check environment variable first
+  if (process.env.NEXT_PUBLIC_BACKEND_URL) {
+    return process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "");
   }
+
+  // 2. Client-side detection
+  if (typeof window !== "undefined") {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return "http://localhost:3001";
+    }
+    return "https://capstack-2k25-backend.onrender.com";
+  }
+
+  // 3. Server-side default
+  return "https://capstack-2k25-backend.onrender.com";
 }
 
-// Ensure no trailing slash
-const API_BASE_URL = apiBaseURL ? apiBaseURL.replace(/\/$/, "") : "https://capstack-2k25-backend.onrender.com";
-
-let mlBaseURL = process.env.NEXT_PUBLIC_ML_URL;
-
-// If no env variable, detect environment
-if (!mlBaseURL && typeof window !== "undefined") {
-  if (window.location.hostname === "localhost") {
-    mlBaseURL = "http://localhost:8000";
-  } else {
-    mlBaseURL = "https://capstack-ml.onrender.com";
+// Determine ML URL based on environment
+function getMLUrl(): string {
+  // 1. Check environment variable first
+  if (process.env.NEXT_PUBLIC_ML_URL) {
+    return process.env.NEXT_PUBLIC_ML_URL.replace(/\/$/, "");
   }
+
+  // 2. Client-side detection
+  if (typeof window !== "undefined") {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return "http://localhost:8000";
+    }
+    return "https://capstack-ml.onrender.com";
+  }
+
+  // 3. Server-side default
+  return "https://capstack-ml.onrender.com";
 }
 
-// Ensure no trailing slash
-const ML_BASE_URL = mlBaseURL ? mlBaseURL.replace(/\/$/, "") : "https://capstack-ml.onrender.com";
+const API_BASE_URL = getApiBackendUrl();
+const ML_BASE_URL = getMLUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

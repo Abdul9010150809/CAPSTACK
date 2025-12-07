@@ -216,6 +216,21 @@ export default function Allocation() {
       // Handle connection errors
       if (err.code === 'ECONNABORTED' || err.code === 'ENOTFOUND' || err.message?.includes('timeout')) {
         setError(`Connection Error: Unable to reach the backend server at ${api.defaults.baseURL || 'https://capstack-2k25-backend.onrender.com'}. The server may be starting up. Please try again in a moment.`);
+      } else if (err.response?.status === 404) {
+        // 404 error - endpoint not found
+        const url = err.config?.url || '/finance/asset-allocation';
+        const baseUrl = err.config?.baseURL || api.defaults.baseURL || 'https://capstack-2k25-backend.onrender.com';
+        console.error("404 Debug Info:", {
+          requestUrl: url,
+          baseURL: baseUrl,
+          fullUrl: `${baseUrl}${url}`,
+          availableEndpoints: [
+            '/finance/health',
+            '/finance/asset-allocation',
+            '/auth/guest-login'
+          ]
+        });
+        setError(`Endpoint not found (404): The API endpoint ${url} does not exist on the backend at ${baseUrl}. Available endpoints: /finance/asset-allocation, /finance/health`);
       } else if (err.response?.status >= 500) {
         setError(`Server Error (${err.response?.status}): The backend server encountered an error. Please try again.`);
       } else {

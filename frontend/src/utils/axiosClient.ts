@@ -1,21 +1,26 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
-// Create only ONE axios instance
-// Production backend: https://capstack-2k25-backend.onrender.com
-// Local development: http://localhost:3001
-let baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-// If no env variable, detect environment
-if (!baseURL && typeof window !== "undefined") {
-  if (window.location.hostname === "localhost") {
-    baseURL = "http://localhost:3001";
-  } else {
-    baseURL = "https://capstack-2k25-backend.onrender.com";
+// Determine backend URL based on environment
+function getBackendUrl(): string {
+  // 1. Check environment variable first (highest priority)
+  if (process.env.NEXT_PUBLIC_BACKEND_URL) {
+    return process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "");
   }
+
+  // 2. Client-side detection
+  if (typeof window !== "undefined") {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return "http://localhost:3001";
+    }
+    // Production: use the domain's protocol and add backend subdomain
+    return "https://capstack-2k25-backend.onrender.com";
+  }
+
+  // 3. Server-side default (SSR)
+  return "https://capstack-2k25-backend.onrender.com";
 }
 
-// Ensure no trailing slash
-const BACKEND_BASE_URL = baseURL ? baseURL.replace(/\/$/, "") : "https://capstack-2k25-backend.onrender.com";
+const BACKEND_BASE_URL = getBackendUrl();
 
 const api = axios.create({
   baseURL: BACKEND_BASE_URL,
