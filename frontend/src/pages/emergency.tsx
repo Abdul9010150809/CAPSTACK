@@ -36,6 +36,7 @@ import {
   Timeline,
   AccountBalance
 } from '@mui/icons-material';
+import { useAuth } from '@/context/AuthContext';
 import {
   PieChart as RechartsPie,
   Pie,
@@ -88,6 +89,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function Emergency() {
   const theme = useTheme();
+  const { user } = useAuth();
+  const isGuest = !user || user.isGuest;
   const [data, setData] = useState<EmergencyFundData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

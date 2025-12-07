@@ -33,6 +33,7 @@ import {
   Lightbulb,
   Refresh
 } from '@mui/icons-material';
+import { useAuth } from '@/context/AuthContext';
 // Navigation is provided globally by _app.tsx
 import api from '@/utils/axiosClient';
 
@@ -74,6 +75,8 @@ interface InsightsData {
 }
 
 export default function Insights() {
+  const { user } = useAuth();
+  const isGuest = !user || user.isGuest;
   const [data, setData] = useState<InsightsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -238,6 +241,34 @@ export default function Insights() {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             AI-powered analysis of your financial health, trends, and personalized recommendations
           </Typography>
+
+          {/* Guest notification banner */}
+          {isGuest && (
+            <Alert 
+              severity="warning" 
+              icon={<Warning />}
+              sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small" 
+                  href="/auth/register"
+                  variant="contained"
+                >
+                  Create Account
+                </Button>
+              }
+            >
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  Demo Mode – Create an Account for Personalized Insights
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  You're viewing demo financial insights. Sign up to get personalized analysis of your actual financial data.
+                </Typography>
+              </Box>
+            </Alert>
+          )}
 
           {/* Summary Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>

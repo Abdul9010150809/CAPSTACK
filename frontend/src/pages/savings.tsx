@@ -31,10 +31,12 @@ import {
   TrendingUp,
   AccountBalance,
   Savings as SavingsIcon,
-  Refresh
+  Refresh,
+  Warning
 } from '@mui/icons-material';
 // Navigation provided globally by _app.tsx
 import api from '@/utils/axiosClient';
+import { useAuth } from '@/context/AuthContext';
 
 interface SavingsPlan {
   id: number;
@@ -56,6 +58,9 @@ interface SavingsData {
 }
 
 export default function Savings() {
+  const { user } = useAuth();
+  const isGuest = !user || user.isGuest;
+  
   const [data, setData] = useState<SavingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -237,6 +242,34 @@ export default function Savings() {
           </Typography>
         </Box>
 
+        {/* Guest notification banner */}
+        {isGuest && (
+          <Alert 
+            severity="warning" 
+            icon={<Warning />}
+            sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}
+            action={
+              <Button 
+                color="inherit" 
+                size="small" 
+                href="/auth/register"
+                variant="contained"
+              >
+                Create Account
+              </Button>
+            }
+          >
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                Demo Mode – Create an Account to Unlock Features
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                You're currently viewing demo savings data. Sign up with your email to create real savings plans, lock your savings, and track your financial discipline.
+              </Typography>
+            </Box>
+          </Alert>
+        )}
+
         {/* Summary Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
@@ -331,9 +364,18 @@ export default function Savings() {
               <Button startIcon={<Refresh />} onClick={fetchSavingsData} size="small">
                 Refresh
               </Button>
-              <Button variant="contained" startIcon={<Add />} onClick={() => setCreatePlanDialogOpen(true)}>
-                Create New Plan
-              </Button>
+              <Tooltip title={isGuest ? "Sign up to create savings plans" : ""} disableHoverListener={!isGuest}>
+                <span>
+                  <Button 
+                    variant="contained" 
+                    startIcon={<Add />} 
+                    onClick={() => setCreatePlanDialogOpen(true)}
+                    disabled={isGuest}
+                  >
+                    Create New Plan
+                  </Button>
+                </span>
+              </Tooltip>
             </Stack>
           </Box>
 
@@ -385,24 +427,38 @@ export default function Savings() {
                         </Stack>
 
                         <Stack direction="row" spacing={1}>
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<Lock />}
-                            onClick={() => openLockDialog(plan)}
-                            disabled={plan.current_amount <= lockedAmount}
+                          <Tooltip 
+                            title={isGuest ? "Sign up to lock your savings" : plan.current_amount <= lockedAmount ? "All savings are locked" : ""} 
+                            disableHoverListener={!isGuest && plan.current_amount > lockedAmount}
                           >
-                            Lock More
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<LockOpen />}
-                            onClick={() => handleUnlockSavings(plan.id)}
-                            disabled={lockedAmount === 0}
+                            <span>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<Lock />}
+                                onClick={() => openLockDialog(plan)}
+                                disabled={isGuest || plan.current_amount <= lockedAmount}
+                              >
+                                Lock More
+                              </Button>
+                            </span>
+                          </Tooltip>
+                          <Tooltip 
+                            title={isGuest ? "Sign up to unlock your savings" : lockedAmount === 0 ? "No locked savings to unlock" : ""} 
+                            disableHoverListener={!isGuest && lockedAmount > 0}
                           >
-                            Unlock
-                          </Button>
+                            <span>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<LockOpen />}
+                                onClick={() => handleUnlockSavings(plan.id)}
+                                disabled={isGuest || lockedAmount === 0}
+                              >
+                                Unlock
+                              </Button>
+                            </span>
+                          </Tooltip>
                         </Stack>
                       </CardContent>
                     </Card>
@@ -419,9 +475,18 @@ export default function Savings() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                     Create your first savings plan to start building your financial security.
                   </Typography>
-                  <Button variant="contained" startIcon={<Add />} onClick={() => setCreatePlanDialogOpen(true)}>
-                    Create Your First Plan
-                  </Button>
+                  <Tooltip title={isGuest ? "Sign up to create savings plans" : ""} disableHoverListener={!isGuest}>
+                    <span>
+                      <Button 
+                        variant="contained" 
+                        startIcon={<Add />} 
+                        onClick={() => setCreatePlanDialogOpen(true)}
+                        disabled={isGuest}
+                      >
+                        Create Your First Plan
+                      </Button>
+                    </span>
+                  </Tooltip>
                 </Paper>
               </Grid>
             )}

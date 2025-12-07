@@ -14,11 +14,13 @@ import {
   CircularProgress
 } from '@mui/material';
 import { useRouter } from 'next/router';
+import { useAuth } from '@/context/AuthContext';
 import api from '@/utils/axiosClient';
 
 export default function Register() {
   const theme = useTheme();
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ name: '', email: '', pin: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,9 +44,28 @@ export default function Register() {
     setError('');
 
     try {
-      await api.post('/auth/register', formData);
+      const response = await api.post('/auth/register', formData);
+      const { token, user } = response.data;
+
+      // Store token and user immediately after registration
+      const userData = user
+        ? {
+            id: user.id?.toString() || "1",
+            email: user.email || formData.email,
+            name: user.name || formData.name,
+            isGuest: user.isGuest || false
+          }
+        : {
+            id: "1",
+            email: formData.email,
+            name: formData.name,
+            isGuest: false
+          };
+
+      login(token, userData);
+      
       setSuccess(true);
-      setTimeout(() => router.push('/auth/login'), 2000);
+      setTimeout(() => router.push('/dashboard'), 1500);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
