@@ -192,16 +192,18 @@ POST   /api/savings/plans                    # Create plan
 
 ---
 
-## 🎬 Demo Materials
+## 🎬 Demo & Documentation
 
-- **Live Application**: [capstack-2k25.onrender.com](https://capstack-2k25.onrender.com)
+- **Live Application**: [https://capstack-2k25.onrender.com](https://capstack-2k25.onrender.com)
+- **Backend API**: [https://capstack-2k25-backend.onrender.com/health](https://capstack-2k25-backend.onrender.com/health)
 - **Demo Video**: `/output/00-DEMO-VIDEO.mkv`
 - **Screenshots**: `/output/screenshots/`
 - **Page PDFs**: `/output/page-pdfs/`
 
 ### Demo Account
-- Email: guest@capstack.io
-- Password: Demo123!
+- **URL**: https://capstack-2k25.onrender.com
+- **Mode**: Use "Guest" mode to explore full functionality
+- **Note**: Create an account with any email to save your data
 
 ---
 
@@ -261,11 +263,13 @@ Guidelines:
 
 ---
 
-## 📞 Support
+## 📞 Support & Resources
 
-- **GitHub Issues**: [Report bugs](https://github.com/Abdul9010150809/CAPSTACK-2k25/issues)
-- **Discussions**: [Ask questions](https://github.com/Abdul9010150809/CAPSTACK-2k25/discussions)
-- **Documentation**: [Full docs](docs/)
+- **Report Issues**: [GitHub Issues](https://github.com/Abdul9010150809/CAPSTACK-2k25/issues)
+- **Discussions & Questions**: [GitHub Discussions](https://github.com/Abdul9010150809/CAPSTACK-2k25/discussions)
+- **Documentation**: [View Docs](docs/)
+- **Setup Guide**: [SETUP_GUIDE.md](SETUP_GUIDE.md)
+- **API Docs**: [FINANCE_API.md](backend-api/FINANCE_API.md)
 
 ---
 
@@ -289,6 +293,6 @@ Powered by:
 
 Building intelligent financial wellness solutions
 
-[View Live Demo](https://capstack-2k25.onrender.com) • [GitHub](https://github.com/Abdul9010150809/CAPSTACK-2k25) • [Email](mailto:contact@capstack.io)
+[View Live Demo](https://capstack-2k25.onrender.com) • [GitHub](https://github.com/Abdul9010150809/CAPSTACK-2k25) • [Report Issues](https://github.com/Abdul9010150809/CAPSTACK-2k25/issues)
 
 </div>
