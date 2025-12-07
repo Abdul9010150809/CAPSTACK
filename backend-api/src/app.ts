@@ -16,11 +16,17 @@ const PORT = process.env.PORT || 3001;
 // ----------------------------------
 // ⭐ CORS Configuration
 // ----------------------------------
+// ⭐ CORS Configuration
+// ----------------------------------
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
   "https://capstack-2k25-frontend.onrender.com",
   "https://capstack-2k25.onrender.com",
+  // Add environment variable support for custom deployment URLs
+  process.env.FRONTEND_URL || "",
 ];
 
 app.use(
@@ -29,17 +35,23 @@ app.use(
       // Allow requests with no origin (mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes(origin?.replace(/\/$/, ""))) {
         callback(null, true);
       } else {
+        // In development, be lenient
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`CORS: Allowing origin in development mode: ${origin}`);
+          return callback(null, true);
+        }
         logger.warn(`CORS rejected origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     optionsSuccessStatus: 200,
+    maxAge: 86400, // 24 hours
   })
 );
 
