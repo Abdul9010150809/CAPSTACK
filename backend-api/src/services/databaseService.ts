@@ -241,9 +241,25 @@ export class DatabaseService {
   }
 
   /**
+   * Log audit event
+   */
+  static async logAuditEvent(userId: number, action: string, details: any, ipAddress?: string, userAgent?: string): Promise<void> {
+    try {
+      await query(
+        `INSERT INTO audit_logs (user_id, action, details, ip_address, user_agent, created_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [userId, action, JSON.stringify(details), ipAddress, userAgent]
+      );
+    } catch (error) {
+      logger.error(`Failed to log audit event for user ${userId}: ${error}`);
+      // Don't fail the main operation if audit logging fails
+    }
+  }
+
+  /**
     * Create user with PIN
     */
-   static async createUserWithPin(email: string, name: string, pin: string): Promise<number> {
+    static async createUserWithPin(email: string, name: string, pin: string, ipAddress?: string, userAgent?: string): Promise<number> {
     try {
       logger.info(`Creating user with email: ${email}, name: ${name}, pin length: ${pin.length}`);
 

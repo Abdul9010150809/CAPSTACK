@@ -10,6 +10,7 @@ export const errorHandler = (err: CustomError, req: Request, res: Response, next
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
   const code = err.code || 'INTERNAL_ERROR';
+  const requestId = (req as any).requestId;
 
   // Log error with full context
   logger.error({
@@ -21,7 +22,7 @@ export const errorHandler = (err: CustomError, req: Request, res: Response, next
     method: req.method,
     userId: (req as any).userId,
     timestamp: new Date().toISOString(),
-  });
+  }, requestId);
 
   // Send appropriate error response
   res.status(status).json({

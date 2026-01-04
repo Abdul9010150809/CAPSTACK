@@ -53,8 +53,8 @@ const StyledCard = styled(Card)(({ theme }) => ({
   position: 'relative',
   overflow: 'visible',
   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-  animation: `${slideInUp} 0.6s ease-out`,
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  animation: `${slideInUp} 0.3s ease-out`,
   '&:hover': {
     transform: 'translateY(-8px)',
     boxShadow: `0 25px 50px ${alpha(theme.palette.primary.main, 0.15)}`,
@@ -79,7 +79,7 @@ const ScoreCircle = styled(Box)(({ theme }) => ({
     inset: -4,
     borderRadius: '50%',
     background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.2)}, ${alpha(theme.palette.secondary.main, 0.2)})`,
-    animation: `${pulse} 3s ease-in-out infinite`,
+    animation: `${pulse} 2s ease-in-out infinite`,
   },
 }));
 
@@ -126,7 +126,7 @@ const AnimatedScore = ({ value, suffix = '' }: { value: number; suffix?: string 
   );
 };
 
-export default function HealthScoreCard({ score, category }: HealthScoreCardProps) {
+const HealthScoreCard = React.memo(function HealthScoreCard({ score, category }: HealthScoreCardProps) {
   
   const getStatus = (score: number) => {
     if (score >= 80) {
@@ -266,4 +266,6 @@ export default function HealthScoreCard({ score, category }: HealthScoreCardProp
       </CardContent>
     </StyledCard>
   );
-}
+});
+
+export default HealthScoreCard;

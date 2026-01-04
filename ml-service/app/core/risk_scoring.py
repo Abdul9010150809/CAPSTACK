@@ -1,20 +1,18 @@
-# TODO: Implement risk scoring using ML model
-# Load trained model and predict risk level
+# Risk scoring using ML model
+
+from ..models import risk_model
 
 def calculate_risk_level(features):
     """
-    Calculate financial risk level based on features.
+    Calculate financial risk level based on features using ML model.
     Returns risk level and insights.
     """
-    # TODO: Load model from risk_model.pkl and predict
-    # For now, simple rule-based scoring
-    expense_ratio = features.get('expense_ratio', 0)
-    debt_ratio = features.get('debt_ratio', 0)
+    risk_score = risk_model.predict(features)
 
-    if expense_ratio > 0.8 or debt_ratio > 0.5:
+    if risk_score > 70:
         risk_level = 'high'
-        insights = ['High expense ratio indicates potential financial stress', 'Consider reducing debt']
-    elif expense_ratio > 0.6 or debt_ratio > 0.3:
+        insights = ['High risk score indicates potential financial stress', 'Consider reducing debt and expenses']
+    elif risk_score > 30:
         risk_level = 'medium'
         insights = ['Moderate risk, monitor expenses closely']
     else:

@@ -1,14 +1,18 @@
 # 🏦 CAPSTACK — AI-Powered Personal Finance Platform
+
 **International Hackathon Edition** | Intelligent Financial Health Management System
 
 [![UI/UX](https://img.shields.io/badge/UI%2FUX-Premium-blue?style=flat-square)](https://capstack-2k25-frontend.onrender.com/)
 [![Stack](https://img.shields.io/badge/Stack-MERN%20%2B%20FastAPI-blueviolet?style=flat-square)](https://nodejs.org)
 
-
 > **"Build Your Safety Net Before the Market Shifts"**
-CAPSTACK is a comprehensive multi-service platform designed to democratize financial wellness. By combining full-stack architecture with AI/ML predictive modeling, we provide users with actionable insights, automated savings protocols, and intelligent analytics. 
+CAPSTACK is a comprehensive multi-service platform designed to democratize financial wellness. By combining full-stack architecture with AI/ML predictive modeling, we provide users with actionable insights, automated savings protocols, and intelligent analytics.
 
-Designed for the **Datanyx 2025 International Hackathon**, this edition features premium UI/UX, production-ready code stability, and zero-downtime deployment.
+## ⚠️ **Educational Purpose Notice**
+
+**This application is designed for educational and demonstrative purposes only.** It uses synthetic data, AI simulations, and mock financial scenarios to illustrate financial concepts. **No real money, medical advice, or real-world financial execution is involved.**
+
+Designed for the **Datanyx 2025 International Hackathon**, this edition features premium UI/UX, production-ready code stability, advanced data visualizations, and comprehensive educational safety measures.
 
 ---
 
@@ -54,10 +58,10 @@ Modern financial management faces critical challenges in developing economies:
 
 CAPSTACK bridges this gap by providing an intelligent financial ecosystem:
 
-* **Predictive Analytics**: Calculates a "Survival Days" metric based on liquid assets and burn rate.
-* **Smart Savings**: Automated "Lock Mechanisms" that prevent impulsive withdrawals until goals are met.
-* **AI Health Score**: A singular 0-100 metric representing holistic financial wellness.
-* **Behavioral Nudging**: Real-time alerts and recommendations to correct negative spending trends.
+- **Predictive Analytics**: Calculates a "Survival Days" metric based on liquid assets and burn rate.
+- **Smart Savings**: Automated "Lock Mechanisms" that prevent impulsive withdrawals until goals are met.
+- **AI Health Score**: A singular 0-100 metric representing holistic financial wellness.
+- **Behavioral Nudging**: Real-time alerts and recommendations to correct negative spending trends.
 
 ---
 
@@ -78,6 +82,7 @@ The application is fully deployed and production-ready on the **Render Cloud Pla
 ## 📊 Key Features
 
 ### Core Functionality
+
 | Feature | Description |
 |---------|-------------|
 | **🧠 AI Health Score** | ML-powered metric (0-100) assessing income stability, savings rate, and spending volatility. |
@@ -85,11 +90,25 @@ The application is fully deployed and production-ready on the **Render Cloud Pla
 | **💰 Smart Savings Lock** | A digital vault that locks funds for specific durations to enforce saving discipline. |
 | **🎯 Asset Allocation** | AI-recommended portfolio distribution based on user risk profile and market conditions. |
 
+### 🚀 **Enhanced Features (Latest Implementation)**
+
+| Feature | Description |
+|---------|-------------|
+| **📊 Interactive Sankey Diagrams** | D3.js powered cash flow visualization showing Income → Essentials → Debt → Savings |
+| **⏱️ Financial Pulse Gauge** | Real-time animated gauge with color-coded survival periods (Red/Yellow/Green/Blue) |
+| **🤖 AI-Generated Summaries** | Natural language explanations of financial data and trends |
+| **🎲 Monte Carlo Simulator** | 10-year net worth projections with confidence intervals for what-if scenarios |
+| **🎯 AI Debt Coach** | Automated debt snowball recommendations prioritizing highest-interest debts |
+| **📈 Anonymized Benchmarking** | Comparative analytics showing percentile rankings vs similar users |
+| **📚 Educational Safety** | Prominent disclaimers and synthetic data for responsible learning |
+
 ### Hackathon Edition Enhancements
-* **Glassmorphism UI**: Modern design system with gradient palettes and fluid animations.
-* **Interactive Visualizations**: Animated circular scores, pulse effects, and real-time chart updates.
-* **Robust Error Handling**: Centralized error boundaries and graceful degradation strategies.
-* **Advanced Security**: JWT-based authentication with secure session management.
+
+- **Glassmorphism UI**: Modern design system with gradient palettes and fluid animations.
+- **Advanced Visualizations**: D3.js Sankey diagrams, Recharts integration, and interactive simulations.
+- **Robust Error Handling**: Centralized error boundaries and graceful degradation strategies.
+- **Educational Framework**: Clear disclaimers, synthetic datasets, and safe experimentation environment.
+- **Advanced Security**: JWT-based authentication with secure session management and audit logging.
 
 ---
 
@@ -158,9 +177,9 @@ CAPSTACK-2k25/
 
 ### Prerequisites
 
-  * Node.js v18+
-  * Python 3.11+ (for ML service)
-  * PostgreSQL 14+
+- Node.js v18+
+- Python 3.11+ (for ML service)
+- PostgreSQL 14+
 
 ### Quick Start (Render-style, no Docker)
 
@@ -226,9 +245,9 @@ The backend exposes a documented REST API.
 
 Comprehensive demonstration materials are available in the `/output` directory:
 
-  * **🎬 Demo Video**: `00-DEMO-VIDEO.mkv` - Complete application walkthrough.
-  * **📸 Screenshots**: High-res captures of the Authentication and Dashboard flows.
-  * **📄 Page PDFs**: Detailed PDF captures of the Financial Assessment and Insights pages.
+- **🎬 Demo Video**: `00-DEMO-VIDEO.mkv` - Complete application walkthrough.
+- **📸 Screenshots**: High-res captures of the Authentication and Dashboard flows.
+- **📄 Page PDFs**: Detailed PDF captures of the Financial Assessment and Insights pages.
 
 -----
 

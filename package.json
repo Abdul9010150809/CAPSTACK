@@ -1,4 +1,7 @@
 {
+  "name": "capstack",
+  "version": "1.0.0",
+  "description": "Financial health benchmarking application",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -9,7 +12,22 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.1",
+    "concurrently": "^8.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend-api && npm run dev\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend-api && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend-api && npm run build",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend-api && npm start",
+    "lint": "concurrently \"npm run lint:frontend\" \"npm run lint:backend\"",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend-api && npm run lint",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   }
 }

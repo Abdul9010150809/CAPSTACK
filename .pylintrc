@@ -1,0 +1,23 @@
+[MASTER]
+ignore-imports=yes
+extension-pkg-whitelist=sklearn,numpy,pandas
+
+[MESSAGES CONTROL]
+disable=
+    import-error,
+    no-name-in-module,
+    unused-argument,
+    fixme,
+    too-many-arguments,
+    too-many-locals,
+    too-many-branches,
+    too-many-statements
+
+[DESIGN]
+max-args=8
+max-attributes=8
+max-branches=15
+
+[FORMAT]
+max-line-length=88
+indent-string='    '

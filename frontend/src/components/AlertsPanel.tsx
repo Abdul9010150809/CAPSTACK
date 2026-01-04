@@ -59,8 +59,8 @@ const StyledCard = styled(Card)(({ theme }) => ({
   backdropFilter: 'blur(10px)',
   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
   borderRadius: 16,
-  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-  animation: `${slideInUp} 0.6s ease-out 0.3s backwards`,
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  animation: `${slideInUp} 0.3s ease-out 0.2s backwards`,
   '&:hover': {
     transform: 'translateY(-8px)',
     boxShadow: `0 25px 50px ${alpha(theme.palette.primary.main, 0.15)}`,
@@ -117,7 +117,7 @@ const AlertItemWrapper = styled(Alert)(({ theme }) => ({
   },
 }));
 
-export default function AlertsPanel({ alerts, onAction }: AlertsPanelProps) {
+const AlertsPanel = React.memo(function AlertsPanel({ alerts, onAction }: AlertsPanelProps) {
   const [expanded, setExpanded] = React.useState(false);
   const [dismissedAlerts, setDismissedAlerts] = React.useState<number[]>([]);
 
@@ -378,4 +378,6 @@ export default function AlertsPanel({ alerts, onAction }: AlertsPanelProps) {
       </CardContent>
     </StyledCard>
   );
-}
+});
+
+export default AlertsPanel;

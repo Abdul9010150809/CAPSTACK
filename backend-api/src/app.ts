@@ -1,14 +1,29 @@
 import express from "express";
+import { Router } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import * as Sentry from "@sentry/node";
 import authRoutes from "./routes/authRoutes";
 import financeRoutes from "./routes/financeRoutes";
 import savingsRoutes from "./routes/savingsRoutes";
 import userRoutes from "./routes/userRoutes";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
-import { logger } from "./utils/logger";
+import { logger, requestIdMiddleware } from "./utils/logger";
+import { metricsMiddleware, getMetrics } from "./utils/metrics";
+import { config } from "./config/env";
+import { optionalAuthMiddleware } from "./middleware/optionalAuthMiddleware";
+import { getBenchmark } from "./controllers/financeController";
 
 dotenv.config();
+
+// Initialize Sentry
+if (config.sentryDsn) {
+  Sentry.init({
+    dsn: config.sentryDsn,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 1.0,
+  });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -61,12 +76,19 @@ app.options("*", cors());
 // ----------------------------------
 // Middleware
 // ----------------------------------
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
+// Request ID middleware
+app.use(requestIdMiddleware);
+
+// Metrics middleware
+app.use(metricsMiddleware);
+
 // Request logging middleware
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.originalUrl}`);
+app.use((req: any, res: any, next: any) => {
+  logger.info(`${req.method} ${req.originalUrl}`, req.requestId);
   next();
 });
 
@@ -82,6 +104,17 @@ app.get("/health", (req, res) => {
   });
 });
 
+// Metrics endpoint
+app.get("/metrics", async (req, res) => {
+  try {
+    const metrics = await getMetrics();
+    res.set('Content-Type', 'text/plain; charset=utf-8');
+    res.send(metrics);
+  } catch (error) {
+    res.status(500).send('Error generating metrics');
+  }
+});
+
 // ----------------------------------
 // Routes
 // ----------------------------------
@@ -89,6 +122,14 @@ app.use("/auth", authRoutes);
 app.use("/finance", financeRoutes);
 app.use("/savings", savingsRoutes);
 app.use("/user", userRoutes);
+
+// ----------------------------------
+// API Aliases (compat with frontend paths)
+// ----------------------------------
+const apiRouter = Router();
+// Alias: /api/benchmarking -> /finance/benchmark
+apiRouter.get("/benchmarking", optionalAuthMiddleware, getBenchmark);
+app.use("/api", apiRouter);
 
 // Root endpoint
 app.get("/", (req, res) => {
@@ -114,6 +155,11 @@ app.use(notFoundHandler);
 
 // Error handler - must be last
 app.use(errorHandler);
+
+// Sentry error handler - must be after all other error handlers
+if (config.sentryDsn) {
+  Sentry.setupExpressErrorHandler(app);
+}
 
 // ----------------------------------
 // Server Startup

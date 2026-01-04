@@ -1,9 +1,21 @@
 -- Asset Allocation Tables for CAPSTACK
 
+-- User Financial Profiles for Benchmarking
+CREATE TABLE user_financial_profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    income_bracket VARCHAR(50) NOT NULL,
+    age_group VARCHAR(50) NOT NULL,
+    health_score INTEGER,
+    survival_period DECIMAL(5,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Asset Allocation Configuration
 CREATE TABLE asset_allocations (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     sip_percentage DECIMAL(5,2) NOT NULL DEFAULT 30.00, -- 20-40%
     stocks_percentage DECIMAL(5,2) NOT NULL DEFAULT 15.00, -- 10-20%
     bonds_percentage DECIMAL(5,2) NOT NULL DEFAULT 20.00, -- 10-30%
@@ -25,7 +37,7 @@ CREATE TABLE asset_allocations (
 -- Emergency Fund Monitoring
 CREATE TABLE emergency_fund_monitoring (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     current_balance DECIMAL(12,2) NOT NULL DEFAULT 0,
     target_months INTEGER NOT NULL DEFAULT 6,
     monthly_burn_rate DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -79,6 +91,7 @@ CREATE TABLE predictive_analytics (
 );
 
 -- Indexes
+CREATE INDEX idx_user_financial_profiles_user_id ON user_financial_profiles(user_id);
 CREATE INDEX idx_asset_allocations_user_id ON asset_allocations(user_id);
 CREATE INDEX idx_emergency_fund_monitoring_user_id ON emergency_fund_monitoring(user_id);
 CREATE INDEX idx_investment_portfolios_user_id ON investment_portfolios(user_id);

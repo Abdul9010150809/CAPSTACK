@@ -1,40 +1,54 @@
 import { Request, Response } from 'express';
 import { query } from '../config/db';
 import { logger } from '../utils/logger';
+import { cache } from '../config/cache';
 
 export const getProfile = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
+    const cacheKey = `user_profile_${userId}`;
 
-    const result = await query(`
-      SELECT
-        u.id, u.email, u.name, u.created_at, u.updated_at,
-        up.monthly_income, up.monthly_expenses, up.emergency_fund,
-        up.savings_rate, up.location, up.industry, up.experience_years
-      FROM users u
-      LEFT JOIN user_profiles up ON u.id = up.user_id
-      WHERE u.id = $1
-    `, [userId]);
+    // Check cache first
+    let profileData = await cache.get(cacheKey);
+    if (!profileData) {
+      const startTime = Date.now();
+      const result = await query(`
+        SELECT
+          u.id, u.email, u.name, u.created_at, u.updated_at,
+          up.monthly_income, up.monthly_expenses, up.emergency_fund,
+          up.savings_rate, up.location, up.industry, up.experience_years
+        FROM users u
+        LEFT JOIN user_profiles up ON u.id = up.user_id
+        WHERE u.id = $1
+      `, [userId]);
+      const queryDuration = Date.now() - startTime;
+      logger.info(`User profile query for user ${userId} took ${queryDuration}ms`);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const row = result.rows[0];
+      profileData = {
+        id: row.id,
+        email: row.email,
+        name: row.name,
+        monthlyIncome: row.monthly_income,
+        monthlyExpenses: row.monthly_expenses,
+        emergencyFund: row.emergency_fund,
+        savingsRate: row.savings_rate,
+        location: row.location,
+        industry: row.industry,
+        experienceYears: row.experience_years,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+
+      // Cache for 5 minutes
+      await cache.set(cacheKey, profileData, 300);
     }
 
-    const row = result.rows[0];
-    res.json({
-      id: row.id,
-      email: row.email,
-      name: row.name,
-      monthlyIncome: row.monthly_income,
-      monthlyExpenses: row.monthly_expenses,
-      emergencyFund: row.emergency_fund,
-      savingsRate: row.savings_rate,
-      location: row.location,
-      industry: row.industry,
-      experienceYears: row.experience_years,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    });
+    res.json(profileData);
   } catch (error) {
     logger.error(`Failed to get user profile for user ${(req as any).userId}: ${error}`);
     res.status(500).json({ error: 'Failed to get profile' });
@@ -114,6 +128,10 @@ export const updateProfile = async (req: Request, res: Response) => {
       new Date(),
       new Date()
     ]);
+
+    // Clear cache after update
+    const cacheKey = `user_profile_${userId}`;
+    await cache.delete(cacheKey);
 
     res.json({ message: 'Profile updated successfully' });
   } catch (error) {

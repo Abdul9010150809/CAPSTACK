@@ -1,3 +1,13 @@
 {
-  "extends": ["next/core-web-vitals"]
+  "root": true,
+  "extends": ["next/core-web-vitals"],
+  "ignorePatterns": ["next.config.js"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "plugins": ["@typescript-eslint"],
+      "rules": {}
+    }
+  ]
 }

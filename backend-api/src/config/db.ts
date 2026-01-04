@@ -21,6 +21,9 @@ export const query = async (text: string, params?: any[]) => {
     return res;
   } catch (error: any) {
     logger.error(`Database query error: ${error.message} (Code: ${error.code})`);
+    if (error.code === '28P01') {
+      logger.error('Database authentication failed. Please check your database credentials in the .env file.');
+    }
     throw error;
   }
 };

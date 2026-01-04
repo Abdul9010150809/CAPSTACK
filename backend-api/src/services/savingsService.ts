@@ -104,25 +104,31 @@ export const unlockSavings = (userId: number, lockId: number, reason: string = '
 
 export const getSavingsStatus = async (userId: number) => {
   try {
-    // Get user financial data for monthly income
-    const userData = await DatabaseService.getUserFinancialData(userId);
+    // Parallelize independent queries
+    const [userData, plansResult, lastTransactionResult] = await Promise.all([
+      DatabaseService.getUserFinancialData(userId),
+      query(`
+        SELECT
+          id,
+          name,
+          target_amount,
+          current_amount,
+          monthly_contribution,
+          lock_percentage,
+          target_date
+        FROM savings_plans
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+      `, [userId]),
+      query(`
+        SELECT MAX(date) as last_date
+        FROM savings_transactions
+        WHERE user_id = $1 AND type = 'deposit'
+      `, [userId])
+    ]);
+
     const monthlyIncome = userData?.monthlyIncome || 0;
     const monthlyAutoSave = Math.floor(monthlyIncome * 0.25); // 25% auto-save
-
-    // Get all savings plans for user
-    const plansResult = await query(`
-      SELECT
-        id,
-        name,
-        target_amount,
-        current_amount,
-        monthly_contribution,
-        lock_percentage,
-        target_date
-      FROM savings_plans
-      WHERE user_id = $1
-      ORDER BY created_at DESC
-    `, [userId]);
 
     const plans = plansResult.rows.map((plan: any) => ({
       id: plan.id,
@@ -140,13 +146,6 @@ export const getSavingsStatus = async (userId: number) => {
     // Assume 70% is locked, 30% available (simplified)
     const locked = Math.floor(totalSaved * 0.7);
     const available = totalSaved - locked;
-
-    // Get last transaction date for lastAutoSave
-    const lastTransactionResult = await query(`
-      SELECT MAX(date) as last_date
-      FROM savings_transactions
-      WHERE user_id = $1 AND type = 'deposit'
-    `, [userId]);
 
     const lastAutoSave = lastTransactionResult.rows[0]?.last_date
       ? new Date(lastTransactionResult.rows[0].last_date)

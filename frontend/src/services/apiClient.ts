@@ -48,6 +48,8 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Some Render endpoints can take longer on cold start; give them more breathing room
+  timeout: 30000,
 });
 
 export const mlClient = axios.create({

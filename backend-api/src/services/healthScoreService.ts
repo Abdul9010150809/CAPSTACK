@@ -1,4 +1,5 @@
 import { DatabaseService } from './databaseService';
+import { cache } from '../config/cache';
 
 interface FinancialData {
   monthlyIncome: number;
@@ -26,6 +27,14 @@ interface HealthScoreResult {
 }
 
 export const calculateHealthScore = async (userId: number): Promise<HealthScoreResult> => {
+  const cacheKey = `health_score_${userId}`;
+
+  // Check cache first
+  const cachedResult = await cache.get(cacheKey);
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   // Fetch real user data from database
   const userData = await DatabaseService.getUserFinancialData(userId);
 
@@ -40,7 +49,9 @@ export const calculateHealthScore = async (userId: number): Promise<HealthScoreR
       incomeStability: 0.85,
       investmentDiversification: 0.7
     };
-    return calculateScoreFromData(mockData);
+    const result = calculateScoreFromData(mockData);
+    await cache.set(cacheKey, result, 300); // Cache for 5 minutes
+    return result;
   }
 
   // Map database data to FinancialData interface
@@ -54,7 +65,9 @@ export const calculateHealthScore = async (userId: number): Promise<HealthScoreR
     investmentDiversification: userData.riskTolerance === 'high' ? 0.8 : userData.riskTolerance === 'medium' ? 0.6 : 0.4
   };
 
-  return calculateScoreFromData(financialData);
+  const result = calculateScoreFromData(financialData);
+  await cache.set(cacheKey, result, 300); // Cache for 5 minutes
+  return result;
 };
 
 export const calculateScoreFromData = (data: FinancialData): HealthScoreResult => {

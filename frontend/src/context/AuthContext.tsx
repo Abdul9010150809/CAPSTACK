@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import jwt from "jsonwebtoken";
+import { jwtDecode } from "jwt-decode";
 
 type User = {
   id: string;
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Try to decode token
-        const decoded = jwt.decode(token);
+        const decoded = jwtDecode(token);
         if (!decoded || typeof decoded !== 'object' || !('exp' in decoded)) {
           // Invalid token format
           localStorage.removeItem('token');

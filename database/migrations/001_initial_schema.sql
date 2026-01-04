@@ -14,7 +14,7 @@ CREATE TABLE users (
 -- User Profiles
 CREATE TABLE user_profiles (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     monthly_income DECIMAL(12,2),
     monthly_expenses DECIMAL(12,2),
     emergency_fund DECIMAL(12,2) DEFAULT 0,
@@ -143,7 +143,7 @@ CREATE TABLE alerts (
     is_read BOOLEAN DEFAULT false,
     actionable BOOLEAN DEFAULT false,
     expires_at TIMESTAMP,
-    metadata JSONB, -- Additional data for the alert
+    metadata NVARCHAR(MAX), -- Additional data for the alert
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -157,7 +157,7 @@ CREATE TABLE financial_insights (
     description TEXT NOT NULL,
     confidence DECIMAL(3,2), -- 0-1
     impact VARCHAR(10), -- low, medium, high
-    recommendations TEXT[], -- Array of recommendations
+    recommendations NVARCHAR(MAX),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -173,7 +173,7 @@ CREATE TABLE transactions (
     merchant VARCHAR(255),
     payment_method VARCHAR(50), -- cash, card, bank_transfer, etc.
     is_recurring BOOLEAN DEFAULT false,
-    tags TEXT[], -- Array of tags for categorization
+    tags NVARCHAR(MAX), -- Tags for categorization (stored as JSON)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -183,7 +183,7 @@ CREATE TABLE health_scores (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     total_score INTEGER NOT NULL,
     grade VARCHAR(5) NOT NULL,
-    category_scores JSONB NOT NULL, -- Detailed breakdown
+    category_scores NVARCHAR(MAX) NOT NULL, -- Detailed breakdown
     date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

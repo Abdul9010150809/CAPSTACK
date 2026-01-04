@@ -4,6 +4,11 @@ import {
   getHealthScore,
   getSurvival,
   getIncomeScore,
+  getWhatIfProjection,
+  getAISummary,
+  getBenchmark,
+  getCashFlow,
+  getDebtRecommendation,
 } from "../controllers/financeController";
 import {
   sendAlert,
@@ -730,5 +735,14 @@ router.post("/notify/achievement", requireAuthMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to send achievement notification" });
   }
 });
+
+/* -------------------------------------------
+   New Advanced Features Routes
+-------------------------------------------- */
+router.post("/what-if", optionalAuthMiddleware, getWhatIfProjection);
+router.get("/ai-summary", optionalAuthMiddleware, getAISummary);
+router.get("/benchmark", optionalAuthMiddleware, getBenchmark);
+router.get("/cashflow", optionalAuthMiddleware, getCashFlow);
+router.get("/debt-recommendation", optionalAuthMiddleware, getDebtRecommendation);
 
 export default router;

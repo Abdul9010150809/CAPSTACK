@@ -1,34 +1,38 @@
 {
-  "name": "frontend",
+  "name": "capstack-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.19",
-    "@mui/material": "^5.14.20",
-    "@types/jsonwebtoken": "^9.0.10",
-    "axios": "^1.6.2",
-    "jsonwebtoken": "^9.0.3",
-    "next": "^14.0.4",
-    "node-cron": "^4.2.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "recharts": "^3.5.1"
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "@sentry/nextjs": "^10.32.1",
+    "@types/jwt-decode": "^2.2.1",
+    "axios": "^1.13.2",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.263.0",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^3.6.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/node-cron": "^3.0.11",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.0.4",
-    "typescript": "^5"
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8.50.0",
+    "eslint-config-next": "^15.0.0",
+    "typescript": "^5.2.0"
+  },
+  "overrides": {
+    "glob": "^10.4.6"
   }
 }

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 const logsDir = path.join(process.cwd(), 'logs');
 
@@ -12,16 +13,34 @@ const getTimestamp = (): string => {
   return new Date().toISOString();
 };
 
-const formatMessage = (level: string, data: any): string => {
-  const timestamp = getTimestamp();
-  if (typeof data === 'string') {
-    return `[${timestamp}] [${level}] ${data}`;
+const sanitizeData = (data: any): any => {
+  if (typeof data === 'object' && data !== null) {
+    const sanitized = { ...data };
+    // Remove sensitive fields
+    const sensitiveFields = ['password', 'token', 'authorization', 'apiKey', 'secret'];
+    sensitiveFields.forEach(field => {
+      if (sanitized[field]) {
+        sanitized[field] = '[REDACTED]';
+      }
+    });
+    return sanitized;
   }
-  return `[${timestamp}] [${level}] ${JSON.stringify(data, null, 2)}`;
+  return data;
 };
 
-const writeLog = (level: string, data: any): void => {
-  const message = formatMessage(level, data);
+const formatMessage = (level: string, data: any, requestId?: string): string => {
+  const timestamp = getTimestamp();
+  const logEntry = {
+    timestamp,
+    level: level.toLowerCase(),
+    message: typeof data === 'string' ? data : sanitizeData(data),
+    ...(requestId && { requestId }),
+  };
+  return JSON.stringify(logEntry);
+};
+
+const writeLog = (level: string, data: any, requestId?: string): void => {
+  const message = formatMessage(level, data, requestId);
   const logFile = path.join(logsDir, `${level.toLowerCase()}.log`);
   const allLogsFile = path.join(logsDir, 'all.log');
 
@@ -31,32 +50,29 @@ const writeLog = (level: string, data: any): void => {
   fs.appendFileSync(allLogsFile, message + '\n', { encoding: 'utf8' });
   // Also log to console in development
   if (process.env.NODE_ENV !== 'production') {
-    const logLevel = level.toLowerCase();
-    if (logLevel === 'error') {
-      console.error(message);
-    } else if (logLevel === 'warn') {
-      console.warn(message);
-    } else if (logLevel === 'debug') {
-      console.debug(message);
-    } else {
-      console.log(message);
-    }
+    console.log(message);
   }
 };
 
 export const logger = {
-  info: (message: string | object) => {
-    writeLog('INFO', message);
+  info: (message: string | object, requestId?: string) => {
+    writeLog('INFO', message, requestId);
   },
-  error: (message: string | object) => {
-    writeLog('ERROR', message);
+  error: (message: string | object, requestId?: string) => {
+    writeLog('ERROR', message, requestId);
   },
-  warn: (message: string | object) => {
-    writeLog('WARN', message);
+  warn: (message: string | object, requestId?: string) => {
+    writeLog('WARN', message, requestId);
   },
-  debug: (message: string | object) => {
+  debug: (message: string | object, requestId?: string) => {
     if (process.env.NODE_ENV === 'development') {
-      writeLog('DEBUG', message);
+      writeLog('DEBUG', message, requestId);
     }
   },
+};
+
+// Middleware to add request ID
+export const requestIdMiddleware = (req: any, res: any, next: any) => {
+  req.requestId = uuidv4();
+  next();
 };
