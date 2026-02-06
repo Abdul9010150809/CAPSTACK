@@ -65,22 +65,52 @@ const Navigation = () => {
     setUserMenuAnchor(null);
   };
 
-  const navItems = [
-    { label: 'Dashboard', href: '/dashboard', icon: <Dashboard sx={{ fontSize: 20 }} /> },
-    { label: 'Assessment', href: '/assessment', icon: <Assessment sx={{ fontSize: 20 }} /> },
-    { label: 'Budget', href: '/budget-planner', icon: <AccountBalanceWallet sx={{ fontSize: 20 }} /> },
-    { label: 'Goals', href: '/goals', icon: <TrackChanges sx={{ fontSize: 20 }} /> },
-    { label: 'Portfolio', href: '/portfolio', icon: <ShowChart sx={{ fontSize: 20 }} /> },
-    { label: 'Debt', href: '/debt-dashboard', icon: <PieChart sx={{ fontSize: 20 }} /> },
-    { label: 'Allocation', href: '/allocation', icon: <PieChart sx={{ fontSize: 20 }} /> },
-    { label: 'Emergency', href: '/emergency', icon: <Shield sx={{ fontSize: 20 }} /> },
-    { label: 'Savings', href: '/savings', icon: <Savings sx={{ fontSize: 20 }} /> },
-    { label: 'Tax', href: '/tax-calculator', icon: <Calculate sx={{ fontSize: 20 }} /> },
-    { label: 'Reports', href: '/reports', icon: <Assessment sx={{ fontSize: 20 }} /> },
-    { label: 'Education', href: '/education', icon: <School sx={{ fontSize: 20 }} /> },
-    { label: 'Community', href: '/community', icon: <People sx={{ fontSize: 20 }} /> },
-    { label: 'Insights', href: '/insights', icon: <Insights sx={{ fontSize: 20 }} /> },
+  const navGroups = [
+    {
+      label: 'Planning',
+      icon: <Assessment sx={{ fontSize: 20 }} />,
+      items: [
+        { label: 'Assessment', href: '/assessment', icon: <Assessment sx={{ fontSize: 18 }} /> },
+        { label: 'Budget Planner', href: '/budget-planner', icon: <AccountBalanceWallet sx={{ fontSize: 18 }} /> },
+        { label: 'Financial Goals', href: '/goals', icon: <TrackChanges sx={{ fontSize: 18 }} /> },
+        { label: 'Tax Calculator', href: '/tax-calculator', icon: <Calculate sx={{ fontSize: 18 }} /> },
+        { label: 'Financial Reports', href: '/reports', icon: <Assessment sx={{ fontSize: 18 }} /> },
+      ]
+    },
+    {
+      label: 'Assets',
+      icon: <AccountBalanceWallet sx={{ fontSize: 20 }} />,
+      items: [
+        { label: 'Portfolio', href: '/portfolio', icon: <ShowChart sx={{ fontSize: 18 }} /> },
+        { label: 'Debt Dashboard', href: '/debt-dashboard', icon: <PieChart sx={{ fontSize: 18 }} /> },
+        { label: 'Asset Allocation', href: '/allocation', icon: <PieChart sx={{ fontSize: 18 }} /> },
+        { label: 'Savings Pulse', href: '/savings', icon: <Savings sx={{ fontSize: 18 }} /> },
+        { label: 'Emergency Monitor', href: '/emergency', icon: <Shield sx={{ fontSize: 18 }} /> },
+      ]
+    },
+    {
+      label: 'Resources',
+      icon: <School sx={{ fontSize: 20 }} />,
+      items: [
+        { label: 'Market Insights', href: '/insights', icon: <Insights sx={{ fontSize: 18 }} /> },
+        { label: 'Education Hub', href: '/education', icon: <School sx={{ fontSize: 18 }} /> },
+        { label: 'Community Feed', href: '/community', icon: <People sx={{ fontSize: 18 }} /> },
+      ]
+    }
   ];
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [activeGroup, setActiveGroup] = React.useState<string | null>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, groupLabel: string) => {
+    setAnchorEl(event.currentTarget);
+    setActiveGroup(groupLabel);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setActiveGroup(null);
+  };
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -105,31 +135,41 @@ const Navigation = () => {
       </Box>
       <Divider />
       <List sx={{ pt: 2 }}>
-        {isAuthenticated && navItems.map((item) => (
-          <ListItem key={item.href} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              component={Link}
-              href={item.href}
-              selected={router.pathname === item.href}
-              onClick={handleDrawerToggle}
-              sx={{
-                borderRadius: 1,
-                mx: 1,
-                '&.Mui-selected': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                  color: 'primary.main',
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.16),
-                  },
-                },
-              }}
-            >
-              <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', color: 'inherit' }}>
-                {item.icon}
-              </Box>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          </ListItem>
+        {isAuthenticated && navGroups.map((group) => (
+          <React.Fragment key={group.label}>
+            <ListItem sx={{ py: 1, px: 2 }}>
+              <Typography variant="overline" color="text.secondary" fontWeight="700">
+                {group.label}
+              </Typography>
+            </ListItem>
+            {group.items.map((item) => (
+              <ListItem key={item.href} disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  component={Link}
+                  href={item.href}
+                  selected={router.pathname === item.href}
+                  onClick={handleDrawerToggle}
+                  sx={{
+                    borderRadius: 1,
+                    mx: 1,
+                    '&.Mui-selected': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                      color: 'primary.main',
+                      '&:hover': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.16),
+                      },
+                    },
+                  }}
+                >
+                  <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', color: 'inherit' }}>
+                    {item.icon}
+                  </Box>
+                  <ListItemText primary={item.label} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+            <Divider sx={{ my: 1, mx: 2 }} />
+          </React.Fragment>
         ))}
         {!isAuthenticated && (
           <>
@@ -235,37 +275,75 @@ const Navigation = () => {
             <>
               {isAuthenticated && (
                 <Box sx={{ flexGrow: 1, display: 'flex', gap: 0.5 }}>
-                  {navItems.map((item) => (
-                    <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+                  <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+                    <Button
+                      startIcon={<Dashboard sx={{ fontSize: 20 }} />}
+                      sx={{
+                        textTransform: 'none',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: (router.pathname === '/dashboard' ? 'primary.main' : 'text.primary'),
+                      }}
+                    >
+                      Dashboard
+                    </Button>
+                  </Link>
+
+                  {navGroups.map((group) => (
+                    <Box key={group.label}>
                       <Button
-                        startIcon={item.icon}
+                        onClick={(e) => handleMenuOpen(e, group.label)}
+                        startIcon={group.icon}
+                        endIcon={<KeyboardArrowDown sx={{ fontSize: 16 }} />}
                         sx={{
                           textTransform: 'none',
                           fontSize: '0.95rem',
-                          fontWeight: (router.pathname === item.href ? 600 : 500),
-                          color: (router.pathname === item.href ? 'primary.main' : 'text.primary'),
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                          position: 'relative',
-                          '&::after': {
-                            content: '""',
-                            position: 'absolute',
-                            bottom: -4,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: (router.pathname === item.href ? '80%' : 0),
-                            height: 2,
-                            background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                            transition: 'width 0.3s ease',
-                            borderRadius: '2px',
-                          },
-                          '&:hover::after': {
-                            width: '80%',
-                          },
+                          fontWeight: 500,
+                          color: 'text.primary',
                         }}
                       >
-                        {item.label}
+                        {group.label}
                       </Button>
-                    </Link>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl) && activeGroup === group.label}
+                        onClose={handleMenuClose}
+                        sx={{ mt: 1 }}
+                        slotProps={{
+                          paper: {
+                            sx: {
+                              borderRadius: 2,
+                              minWidth: 200,
+                              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                            }
+                          }
+                        }}
+                      >
+                        {group.items.map((item) => (
+                          <MenuItem
+                            key={item.href}
+                            component={Link}
+                            href={item.href}
+                            onClick={handleMenuClose}
+                            selected={router.pathname === item.href}
+                            sx={{
+                              py: 1,
+                              px: 2,
+                              borderRadius: 1,
+                              mx: 0.5,
+                              '&.Mui-selected': {
+                                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                color: 'primary.main',
+                                '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.15) }
+                              }
+                            }}
+                          >
+                            <Box sx={{ mr: 2, display: 'flex', color: 'inherit' }}>{item.icon}</Box>
+                            <Typography variant="body2">{item.label}</Typography>
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </Box>
                   ))}
                 </Box>
               )}

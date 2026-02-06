@@ -614,10 +614,10 @@ export default function Dashboard() {
                     Risk Mitigation Score
                   </Typography>
                   <AnimatedNumber
-                    value={Math.round(data.incomeScore.categoryScores.growth)}
+                    value={Math.round(data.incomeScore?.categoryScores?.growth || 0)}
                     suffix="%"
                   />
-                  <StatusChip value={Math.round(data.incomeScore.categoryScores.growth)} />
+                  <StatusChip value={Math.round(data.incomeScore?.categoryScores?.growth || 0)} />
                 </CardContent>
               </Card>
             </Grow>
@@ -637,9 +637,9 @@ export default function Dashboard() {
                 <GridTyped container spacing={3}>
                   <GridTyped item xs={12} md={6}>
                     <EnhancedHealthScoreCard
-                      score={Math.round(data.healthScore.categoryScores.stability)}
+                      score={Math.round(data.healthScore?.categoryScores?.stability || 0)}
                       category="Income Stability"
-                      previousScore={Math.round(data.healthScore.categoryScores.stability * 0.9)}
+                      previousScore={Math.round((data.healthScore?.categoryScores?.stability || 0) * 0.9)}
                       insights={[
                         "Your income stability has improved by 10% this quarter",
                         "Industry growth trends favor your skill set",
@@ -655,9 +655,9 @@ export default function Dashboard() {
                   </GridTyped>
                   <GridTyped item xs={12} md={6}>
                     <EnhancedHealthScoreCard
-                      score={Math.round(data.healthScore.categoryScores.expenseManagement)}
+                      score={Math.round(data.healthScore?.categoryScores?.expenseManagement || 0)}
                       category="Expense Control"
-                      previousScore={Math.round(data.healthScore.categoryScores.expenseManagement * 0.95)}
+                      previousScore={Math.round((data.healthScore?.categoryScores?.expenseManagement || 0) * 0.95)}
                       insights={[
                         "Expense ratio within optimal range",
                         "Discretionary spending reduced by 15%",
@@ -673,9 +673,9 @@ export default function Dashboard() {
                   </GridTyped>
                   <GridTyped item xs={12} md={6}>
                     <EnhancedHealthScoreCard
-                      score={Math.round(data.healthScore.categoryScores.savings)}
+                      score={Math.round(data.healthScore?.categoryScores?.savings || 0)}
                       category="Savings Discipline"
-                      previousScore={Math.round(data.healthScore.categoryScores.savings * 1.05)}
+                      previousScore={Math.round((data.healthScore?.categoryScores?.savings || 0) * 1.05)}
                       insights={[
                         "Savings rate above recommended 20%",
                         "Emergency fund growing steadily",
@@ -691,9 +691,9 @@ export default function Dashboard() {
                   </GridTyped>
                   <GridTyped item xs={12} md={6}>
                     <EnhancedHealthScoreCard
-                      score={Math.round(data.healthScore.categoryScores.emergencyPreparedness)}
+                      score={Math.round(data.healthScore?.categoryScores?.emergencyPreparedness || 0)}
                       category="Emergency Preparedness"
-                      previousScore={Math.round(data.healthScore.categoryScores.emergencyPreparedness * 0.85)}
+                      previousScore={Math.round((data.healthScore?.categoryScores?.emergencyPreparedness || 0) * 0.85)}
                       insights={[
                         "Emergency fund covers 4+ months",
                         "Insurance coverage adequate",
@@ -753,10 +753,10 @@ export default function Dashboard() {
                         <RechartsPie>
                           <Pie
                             data={[
-                              { name: 'Stability', value: Math.round(data.healthScore.categoryScores.stability) },
-                              { name: 'Expense Mgmt', value: Math.round(data.healthScore.categoryScores.expenseManagement) },
-                              { name: 'Emergency', value: Math.round(data.healthScore.categoryScores.emergencyPreparedness) },
-                              { name: 'Debt', value: Math.round(data.healthScore.categoryScores.debtBurden) },
+                              { name: 'Stability', value: Math.round(data.healthScore?.categoryScores?.stability || 0) },
+                              { name: 'Expense Mgmt', value: Math.round(data.healthScore?.categoryScores?.expenseManagement || 0) },
+                              { name: 'Emergency', value: Math.round(data.healthScore?.categoryScores?.emergencyPreparedness || 0) },
+                              { name: 'Debt', value: Math.round(data.healthScore?.categoryScores?.debtBurden || 0) },
                             ]}
                             cx="50%"
                             cy="50%"
@@ -791,8 +791,8 @@ export default function Dashboard() {
                         <RechartsBar data={[
                           {
                             name: 'Monthly',
-                            income: data.healthScore.categoryScores.stability * 100,
-                            expenses: (100 - data.healthScore.categoryScores.expenseManagement) * 100
+                            income: (data.healthScore?.categoryScores?.stability || 0) * 100,
+                            expenses: (100 - (data.healthScore?.categoryScores?.expenseManagement || 0)) * 100
                           }
                         ]}>
                           <CartesianGrid strokeDasharray="3 3" />
@@ -821,9 +821,9 @@ export default function Dashboard() {
                     <ClientOnly>
                       <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={[
-                          { month: 'Month 1', savings: data.savings.monthlyAutoSave * 0.8 },
-                          { month: 'Month 2', savings: data.savings.monthlyAutoSave * 0.9 },
-                          { month: 'Month 3', savings: data.savings.monthlyAutoSave }
+                          { month: 'Month 1', savings: (data.savings?.monthlyAutoSave || 0) * 0.8 },
+                          { month: 'Month 2', savings: (data.savings?.monthlyAutoSave || 0) * 0.9 },
+                          { month: 'Month 3', savings: (data.savings?.monthlyAutoSave || 0) }
                         ]}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="month" />

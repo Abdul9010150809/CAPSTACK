@@ -133,8 +133,9 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
   const [animatingScore, setAnimatingScore] = useState(0);
 
   useEffect(() => {
+    const validScore = isNaN(score) ? 0 : score;
     const timer = setTimeout(() => {
-      setAnimatingScore(score);
+      setAnimatingScore(validScore);
     }, 500);
     return () => clearTimeout(timer);
   }, [score]);
@@ -181,22 +182,22 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {statusIcon}
-              <Chip 
-                label={statusLabel} 
-                size="small" 
+              <Chip
+                label={statusLabel}
+                size="small"
                 color={score >= 60 ? 'primary' : 'error'}
                 sx={{ fontWeight: 'bold' }}
               />
               {getTrendIcon()}
             </Box>
           </Box>
-          
+
           <Box sx={{ display: 'flex', gap: 1 }}>
             {onRefresh && (
               <Tooltip title="Refresh Score">
                 <IconButton size="small" onClick={onRefresh} disabled={loading}>
-                  <Refresh sx={{ 
-                    transform: loading ? 'rotate(360deg)' : 'none', 
+                  <Refresh sx={{
+                    transform: loading ? 'rotate(360deg)' : 'none',
                     transition: 'transform 0.5s',
                     opacity: loading ? 0.7 : 1
                   }} />
@@ -204,8 +205,8 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
               </Tooltip>
             )}
             <Tooltip title="More Details">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 onClick={() => setExpanded(!expanded)}
                 sx={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }}
               >
@@ -222,12 +223,15 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
           >
-            <ScoreRing score={animatingScore} color={scoreColor}>
+            <ScoreRing
+              score={isNaN(animatingScore) ? 0 : animatingScore}
+              color={scoreColor || theme.palette.primary.main}
+            >
               {loading ? (
                 <CircularProgress size={60} />
               ) : (
                 <ScoreText variant="h3">
-                  {Math.round(animatingScore)}
+                  {Math.round(isNaN(animatingScore) ? 0 : animatingScore)}
                 </ScoreText>
               )}
             </ScoreRing>
@@ -281,7 +285,7 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
               transition={{ duration: 0.3 }}
             >
               <Divider sx={{ my: 2 }} />
-              
+
               {/* Insights */}
               {insights.length > 0 && (
                 <Box sx={{ mb: 2 }}>
@@ -322,8 +326,8 @@ const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
                         variant="outlined"
                         size="small"
                         fullWidth
-                        sx={{ 
-                          justifyContent: 'flex-start', 
+                        sx={{
+                          justifyContent: 'flex-start',
                           textAlign: 'left',
                           mb: 1,
                           borderColor: alpha(theme.palette.primary.main, 0.3),

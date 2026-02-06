@@ -422,7 +422,7 @@ export default function Allocation() {
       {/* ---------------- METRICS ---------------- */}
 
       <GridTyped container spacing={3} sx={{ mb: 4 }}>
-        <GridTyped xs={12} md={6} lg={3}>
+        <GridTyped item xs={12} md={6} lg={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -441,7 +441,7 @@ export default function Allocation() {
           </Card>
         </GridTyped>
 
-        <GridTyped xs={12} md={6} lg={3}>
+        <GridTyped item xs={12} md={6} lg={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -461,7 +461,7 @@ export default function Allocation() {
           </Card>
         </GridTyped>
 
-        <GridTyped xs={12} md={6} lg={3}>
+        <GridTyped item xs={12} md={6} lg={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -481,7 +481,7 @@ export default function Allocation() {
           </Card>
         </GridTyped>
 
-        <GridTyped xs={12} md={6} lg={3}>
+        <GridTyped item xs={12} md={6} lg={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -501,7 +501,7 @@ export default function Allocation() {
 
       <GridTyped container spacing={4} sx={{ mb: 4 }}>
         {/* PIE */}
-        <GridTyped xs={12} lg={6}>
+        <GridTyped item xs={12} lg={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
@@ -531,7 +531,7 @@ export default function Allocation() {
         </GridTyped>
 
         {/* BAR */}
-        <GridTyped xs={12} lg={6}>
+        <GridTyped item xs={12} lg={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
@@ -556,7 +556,7 @@ export default function Allocation() {
 
       <GridTyped container spacing={3} sx={{ mb: 4 }}>
         {pieData.map((item, i) => (
-          <GridTyped xs={12} sm={6} md={4} key={item.name}>
+          <GridTyped item xs={12} sm={6} md={4} key={item.name}>
             <Card>
               <CardContent>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
