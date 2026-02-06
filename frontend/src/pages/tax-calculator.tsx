@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Grid, Card, CardContent, TextField, Select, MenuItem, FormControl, InputLabel, Button, Chip } from '@mui/material';
+import { Box, Container, Typography, Grid, Card, CardContent, TextField, Select, MenuItem, FormControl, InputLabel, Button, Chip, Stack, Divider } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Layout from '../components/Layout';
 
 const TaxCalculator = () => {
     const [income, setIncome] = useState(1200000);
-    const [regime, setRegime] = useState<'old' | 'new'>('new');
     const [deductions, setDeductions] = useState({
         section80C: 150000,
         section80D: 25000,
@@ -13,15 +12,18 @@ const TaxCalculator = () => {
         nps: 50000,
     });
 
-    const calculateTax = () => {
-        let taxableIncome = income;
-
+    const calculateTaxForRegime = (regime: 'old' | 'new', grossIncome: number) => {
+        let taxableIncome = grossIncome;
         if (regime === 'old') {
-            taxableIncome -= deductions.section80C;
-            taxableIncome -= deductions.section80D;
-            taxableIncome -= deductions.homeLoan;
-            taxableIncome -= deductions.nps;
+            taxableIncome -= Math.min(deductions.section80C, 150000);
+            taxableIncome -= Math.min(deductions.section80D, 25000); // simplified
+            taxableIncome -= Math.min(deductions.homeLoan, 200000);
+            taxableIncome -= Math.min(deductions.nps, 50000);
         }
+
+        // Standard deduction
+        taxableIncome -= 50000;
+        taxableIncome = Math.max(0, taxableIncome);
 
         let tax = 0;
         if (regime === 'new') {
@@ -32,282 +34,208 @@ const TaxCalculator = () => {
             else if (taxableIncome <= 1200000) tax = 45000 + (taxableIncome - 900000) * 0.15;
             else if (taxableIncome <= 1500000) tax = 90000 + (taxableIncome - 1200000) * 0.20;
             else tax = 150000 + (taxableIncome - 1500000) * 0.30;
+
+            // Rebate under 7L for new regime
+            if (taxableIncome <= 700000) tax = 0;
         } else {
             // Old regime slabs
             if (taxableIncome <= 250000) tax = 0;
             else if (taxableIncome <= 500000) tax = (taxableIncome - 250000) * 0.05;
             else if (taxableIncome <= 1000000) tax = 12500 + (taxableIncome - 500000) * 0.20;
             else tax = 112500 + (taxableIncome - 1000000) * 0.30;
+
+            // Rebate under 5L for old regime
+            if (taxableIncome <= 500000) tax = 0;
         }
 
-        // Add 4% cess
-        tax = tax * 1.04;
+        tax = tax * 1.04; // Cess
 
         return {
             taxableIncome,
             tax: Math.round(tax),
-            effectiveRate: ((tax / income) * 100).toFixed(2),
-            takeHome: income - Math.round(tax),
+            effectiveRate: ((tax / grossIncome) * 100 || 0).toFixed(1),
+            takeHome: grossIncome - Math.round(tax),
         };
     };
 
-    const taxData = calculateTax();
+    const newRegimeData = calculateTaxForRegime('new', income);
+    const oldRegimeData = calculateTaxForRegime('old', income);
+    const betterRegime = newRegimeData.tax < oldRegimeData.tax ? 'new' : 'old';
+    const savings = Math.abs(newRegimeData.tax - oldRegimeData.tax);
 
-    const breakdownData = [
-        { name: 'Take Home', value: taxData.takeHome, color: '#10b981' },
-        { name: 'Tax', value: taxData.tax, color: '#ef4444' },
-    ];
-
-    const monthlyBreakdown = [
-        { month: 'Gross Income', amount: Math.round(income / 12) },
-        { month: 'Tax Deducted', amount: Math.round(taxData.tax / 12) },
-        { month: 'Take Home', amount: Math.round(taxData.takeHome / 12) },
+    const comparisonData = [
+        { name: 'Old Regime', tax: oldRegimeData.tax, takeHome: oldRegimeData.takeHome },
+        { name: 'New Regime', tax: newRegimeData.tax, takeHome: newRegimeData.takeHome },
     ];
 
     return (
-        <Layout>
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
-                    🧾 Tax Calculator
-                </Typography>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                    <Typography variant="h4" fontWeight="800">
+                        🧾 Tax Optimizer
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                        Compare and optimize your tax liability between regimes
+                    </Typography>
+                </Box>
+                {savings > 0 && (
+                    <Chip
+                        label={`Save ₹${savings.toLocaleString()} with ${betterRegime === 'new' ? 'New' : 'Old'} Regime`}
+                        color="success"
+                        sx={{ fontWeight: 700, px: 1, py: 2, height: 'auto', borderRadius: 2 }}
+                    />
+                )}
+            </Box>
 
-                <Grid container spacing={3}>
-                    {/* Input Section */}
-                    <Grid item xs={12} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                                    Income Details
-                                </Typography>
-
+            <Grid container spacing={4}>
+                {/* Inputs */}
+                <Grid item xs={12} lg={4}>
+                    <Card sx={{ borderRadius: 4, height: '100%' }}>
+                        <CardContent sx={{ p: 4 }}>
+                            <Typography variant="h6" fontWeight="700" gutterBottom>
+                                Financial Inputs
+                            </Typography>
+                            <Stack spacing={3} sx={{ mt: 3 }}>
                                 <TextField
                                     fullWidth
-                                    label="Annual Income"
+                                    label="Annual Gross Salary"
                                     type="number"
                                     value={income}
                                     onChange={(e) => setIncome(Number(e.target.value))}
-                                    sx={{ mb: 3 }}
-                                    InputProps={{
-                                        startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
-                                    }}
+                                    InputProps={{ startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography> }}
                                 />
 
-                                <FormControl fullWidth sx={{ mb: 3 }}>
-                                    <InputLabel>Tax Regime</InputLabel>
-                                    <Select
-                                        value={regime}
-                                        label="Tax Regime"
-                                        onChange={(e) => setRegime(e.target.value as 'old' | 'new')}
-                                    >
-                                        <MenuItem value="new">New Regime (Lower rates, no deductions)</MenuItem>
-                                        <MenuItem value="old">Old Regime (Higher rates, with deductions)</MenuItem>
-                                    </Select>
-                                </FormControl>
+                                <Divider>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                                        DEDUCTIONS (OLD REGIME ONLY)
+                                    </Typography>
+                                </Divider>
 
-                                {regime === 'old' && (
-                                    <Box>
-                                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-                                            Deductions
-                                        </Typography>
+                                <TextField
+                                    label="Section 80C"
+                                    type="number"
+                                    value={deductions.section80C}
+                                    onChange={(e) => setDeductions({ ...deductions, section80C: Number(e.target.value) })}
+                                    helperText="PPF, ELSS, LIC (Max 1.5L)"
+                                />
+                                <TextField
+                                    label="Medical Insurance (80D)"
+                                    type="number"
+                                    value={deductions.section80D}
+                                    onChange={(e) => setDeductions({ ...deductions, section80D: Number(e.target.value) })}
+                                />
+                                <TextField
+                                    label="Home Loan Interest (Sec 24)"
+                                    type="number"
+                                    value={deductions.homeLoan}
+                                    onChange={(e) => setDeductions({ ...deductions, homeLoan: Number(e.target.value) })}
+                                />
+                                <TextField
+                                    label="NPS (80CCD 1B)"
+                                    type="number"
+                                    value={deductions.nps}
+                                    onChange={(e) => setDeductions({ ...deductions, nps: Number(e.target.value) })}
+                                    helperText="Additional 50k"
+                                />
+                            </Stack>
+                        </CardContent>
+                    </Card>
+                </Grid>
 
-                                        <TextField
-                                            fullWidth
-                                            label="Section 80C (PPF, ELSS, etc.)"
-                                            type="number"
-                                            value={deductions.section80C}
-                                            onChange={(e) => setDeductions({ ...deductions, section80C: Number(e.target.value) })}
-                                            sx={{ mb: 2 }}
-                                            InputProps={{
-                                                startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
-                                            }}
-                                            helperText="Max: ₹1,50,000"
-                                        />
-
-                                        <TextField
-                                            fullWidth
-                                            label="Section 80D (Health Insurance)"
-                                            type="number"
-                                            value={deductions.section80D}
-                                            onChange={(e) => setDeductions({ ...deductions, section80D: Number(e.target.value) })}
-                                            sx={{ mb: 2 }}
-                                            InputProps={{
-                                                startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
-                                            }}
-                                            helperText="Max: ₹25,000"
-                                        />
-
-                                        <TextField
-                                            fullWidth
-                                            label="Home Loan Interest"
-                                            type="number"
-                                            value={deductions.homeLoan}
-                                            onChange={(e) => setDeductions({ ...deductions, homeLoan: Number(e.target.value) })}
-                                            sx={{ mb: 2 }}
-                                            InputProps={{
-                                                startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
-                                            }}
-                                            helperText="Max: ₹2,00,000"
-                                        />
-
-                                        <TextField
-                                            fullWidth
-                                            label="NPS (Additional 80CCD(1B))"
-                                            type="number"
-                                            value={deductions.nps}
-                                            onChange={(e) => setDeductions({ ...deductions, nps: Number(e.target.value) })}
-                                            InputProps={{
-                                                startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
-                                            }}
-                                            helperText="Max: ₹50,000"
-                                        />
+                {/* Comparison Results */}
+                <Grid item xs={12} lg={8}>
+                    <Grid container spacing={3}>
+                        {/* New Regime Card */}
+                        <Grid item xs={12} md={6}>
+                            <Card sx={{
+                                borderRadius: 4,
+                                border: betterRegime === 'new' ? '2px solid' : '1px solid',
+                                borderColor: betterRegime === 'new' ? 'success.main' : 'divider',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}>
+                                {betterRegime === 'new' && (
+                                    <Box sx={{ bgcolor: 'success.main', color: 'white', py: 0.5, textAlign: 'center', fontWeight: 700, fontSize: '0.75rem' }}>
+                                        RECOMMENDED
                                     </Box>
                                 )}
-                            </CardContent>
-                        </Card>
-                    </Grid>
+                                <CardContent sx={{ p: 4 }}>
+                                    <Typography variant="h6" fontWeight="700">New Regime</Typography>
+                                    <Typography variant="body2" color="text.secondary" gutterBottom>FY 2024-25 Defaut</Typography>
+                                    <Box sx={{ mt: 3 }}>
+                                        <Typography variant="h3" fontWeight="900" color="primary">
+                                            ₹{newRegimeData.tax.toLocaleString()}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                            Effective Rate: {newRegimeData.effectiveRate}%
+                                        </Typography>
+                                    </Box>
+                                    <Stack direction="row" justifyContent="space-between" sx={{ mt: 3 }}>
+                                        <Typography variant="body2" fontWeight="600">Monthly Take-home</Typography>
+                                        <Typography variant="body2" fontWeight="700">₹{Math.round(newRegimeData.takeHome / 12).toLocaleString()}</Typography>
+                                    </Stack>
+                                </CardContent>
+                            </Card>
+                        </Grid>
 
-                    {/* Results Section */}
-                    <Grid item xs={12} md={8}>
-                        <Grid container spacing={3}>
-                            {/* Summary Cards */}
-                            <Grid item xs={12} md={6}>
-                                <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                                    <CardContent>
-                                        <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>Taxable Income</Typography>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            ₹{taxData.taxableIncome.toLocaleString()}
+                        {/* Old Regime Card */}
+                        <Grid item xs={12} md={6}>
+                            <Card sx={{
+                                borderRadius: 4,
+                                border: betterRegime === 'old' ? '2px solid' : '1px solid',
+                                borderColor: betterRegime === 'old' ? 'success.main' : 'divider',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}>
+                                {betterRegime === 'old' && (
+                                    <Box sx={{ bgcolor: 'success.main', color: 'white', py: 0.5, textAlign: 'center', fontWeight: 700, fontSize: '0.75rem' }}>
+                                        RECOMMENDED
+                                    </Box>
+                                )}
+                                <CardContent sx={{ p: 4 }}>
+                                    <Typography variant="h6" fontWeight="700">Old Regime</Typography>
+                                    <Typography variant="body2" color="text.secondary" gutterBottom>With Deductions</Typography>
+                                    <Box sx={{ mt: 3 }}>
+                                        <Typography variant="h3" fontWeight="900" color="primary">
+                                            ₹{oldRegimeData.tax.toLocaleString()}
                                         </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                            Effective Rate: {oldRegimeData.effectiveRate}%
+                                        </Typography>
+                                    </Box>
+                                    <Stack direction="row" justifyContent="space-between" sx={{ mt: 3 }}>
+                                        <Typography variant="body2" fontWeight="600">Monthly Take-home</Typography>
+                                        <Typography variant="body2" fontWeight="700">₹{Math.round(oldRegimeData.takeHome / 12).toLocaleString()}</Typography>
+                                    </Stack>
+                                </CardContent>
+                            </Card>
+                        </Grid>
 
-                            <Grid item xs={12} md={6}>
-                                <Card sx={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
-                                    <CardContent>
-                                        <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>Total Tax</Typography>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            ₹{taxData.tax.toLocaleString()}
-                                        </Typography>
-                                        <Typography variant="caption">
-                                            Effective Rate: {taxData.effectiveRate}%
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Card sx={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', color: 'white' }}>
-                                    <CardContent>
-                                        <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>Annual Take Home</Typography>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            ₹{taxData.takeHome.toLocaleString()}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Card sx={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white' }}>
-                                    <CardContent>
-                                        <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>Monthly Take Home</Typography>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            ₹{Math.round(taxData.takeHome / 12).toLocaleString()}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            {/* Income Distribution */}
-                            <Grid item xs={12} md={6}>
-                                <Card>
-                                    <CardContent>
-                                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                                            Income Distribution
-                                        </Typography>
-                                        <ResponsiveContainer width="100%" height={250}>
-                                            <PieChart>
-                                                <Pie
-                                                    data={breakdownData}
-                                                    cx="50%"
-                                                    cy="50%"
-                                                    labelLine={false}
-                                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                                    outerRadius={80}
-                                                    fill="#8884d8"
-                                                    dataKey="value"
-                                                >
-                                                    {breakdownData.map((entry, index) => (
-                                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                                    ))}
-                                                </Pie>
-                                                <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} />
-                                            </PieChart>
-                                        </ResponsiveContainer>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            {/* Monthly Breakdown */}
-                            <Grid item xs={12} md={6}>
-                                <Card>
-                                    <CardContent>
-                                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                                            Monthly Breakdown
-                                        </Typography>
-                                        <ResponsiveContainer width="100%" height={250}>
-                                            <BarChart data={monthlyBreakdown}>
-                                                <XAxis dataKey="month" />
-                                                <YAxis />
-                                                <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} />
-                                                <Bar dataKey="amount" fill="#667eea" />
+                        {/* Chart */}
+                        <Grid item xs={12}>
+                            <Card sx={{ borderRadius: 4 }}>
+                                <CardContent sx={{ p: 4 }}>
+                                    <Typography variant="h6" fontWeight="700" gutterBottom>Regime Comparison</Typography>
+                                    <Box sx={{ height: 300, mt: 2 }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={comparisonData}>
+                                                <XAxis dataKey="name" />
+                                                <YAxis tickFormatter={(v) => `₹${(v / 1000).toLocaleString()}k`} />
+                                                <Tooltip formatter={(v: any) => `₹${v.toLocaleString()}`} />
+                                                <Legend />
+                                                <Bar dataKey="tax" name="Tax Payable" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                                                <Bar dataKey="takeHome" name="Take Home" fill="#10b981" radius={[4, 4, 0, 0]} />
                                             </BarChart>
                                         </ResponsiveContainer>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            {/* Tax Saving Tips */}
-                            <Grid item xs={12}>
-                                <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                                    <CardContent>
-                                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                                            💡 Tax Saving Recommendations
-                                        </Typography>
-                                        <Box sx={{ mt: 2 }}>
-                                            {regime === 'new' ? (
-                                                <>
-                                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                                        • You&apos;re using the New Tax Regime. Consider switching to Old Regime if you can claim deductions worth more than ₹{Math.round((taxData.tax * 0.15))}.
-                                                    </Typography>
-                                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                                        • The New Regime offers lower tax rates but no deductions. It&apos;s beneficial if you don&apos;t have many investments.
-                                                    </Typography>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                                        • Maximize your Section 80C deduction by investing in ELSS, PPF, or NPS to save up to ₹46,800 in taxes.
-                                                    </Typography>
-                                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                                        • Claim health insurance premium under Section 80D to save up to ₹7,800 in taxes.
-                                                    </Typography>
-                                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                                        • Consider additional NPS contribution under 80CCD(1B) for extra ₹15,600 tax savings.
-                                                    </Typography>
-                                                </>
-                                            )}
-                                            <Typography variant="body2">
-                                                • Your effective tax rate is {taxData.effectiveRate}%. The average for your income bracket is {(Number(taxData.effectiveRate) + 2).toFixed(2)}%.
-                                            </Typography>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
+                                    </Box>
+                                </CardContent>
+                            </Card>
                         </Grid>
                     </Grid>
                 </Grid>
-            </Container>
-        </Layout>
+            </Grid>
+        </Container>
     );
 };
 

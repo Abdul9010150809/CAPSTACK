@@ -46,11 +46,11 @@ async function seedDatabase() {
         await query(
             `INSERT INTO asset_allocations 
        (user_id, sip_percentage, stocks_percentage, bonds_percentage, lifestyle_percentage, emergency_fund_percentage, 
-        monthly_income, allocated_sip, allocated_stocks, allocated_bonds, allocated_lifestyle, allocated_emergency)
+        monthly_income, sip_amount, stocks_amount, bonds_amount, lifestyle_amount, emergency_amount)
        VALUES ($1, 30.00, 15.00, 20.00, 25.00, 10.00, 60000.00, 18000.00, 9000.00, 12000.00, 15000.00, 6000.00)
        ON CONFLICT (user_id) DO UPDATE SET
        monthly_income = EXCLUDED.monthly_income,
-       allocated_sip = EXCLUDED.allocated_sip`,
+       sip_amount = EXCLUDED.sip_amount`,
             [userId]
         );
 

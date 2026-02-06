@@ -48,176 +48,174 @@ const Help = () => {
     );
 
     return (
-        <Layout>
-            <Container maxWidth="lg" sx={{ py: 4 }}>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
-                    ❓ Help & Support
-                </Typography>
-                <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
-                    Find answers to common questions or get in touch with our support team
-                </Typography>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+                ❓ Help & Support
+            </Typography>
+            <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
+                Find answers to common questions or get in touch with our support team
+            </Typography>
 
-                {/* Search */}
-                <Card sx={{ mb: 4 }}>
-                    <CardContent>
-                        <TextField
-                            fullWidth
-                            placeholder="Search for help..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Search />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </CardContent>
-                </Card>
+            {/* Search */}
+            <Card sx={{ mb: 4 }}>
+                <CardContent>
+                    <TextField
+                        fullWidth
+                        placeholder="Search for help..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                </CardContent>
+            </Card>
 
-                <Grid container spacing={3}>
-                    {/* Quick Links */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-                            Quick Links
-                        </Typography>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6} md={3}>
-                                <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
-                                    <CardContent sx={{ textAlign: 'center' }}>
-                                        <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                            Video Tutorials
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Watch step-by-step guides
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} sm={6} md={3}>
-                                <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
-                                    <CardContent sx={{ textAlign: 'center' }}>
-                                        <Article sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                            Documentation
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Read detailed guides
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} sm={6} md={3}>
-                                <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
-                                    <CardContent sx={{ textAlign: 'center' }}>
-                                        <Chat sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                            Live Chat
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Chat with support
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} sm={6} md={3}>
-                                <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
-                                    <CardContent sx={{ textAlign: 'center' }}>
-                                        <Email sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                            Email Support
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Get help via email
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-
-                    {/* FAQs */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-                            Frequently Asked Questions
-                        </Typography>
-                        {filteredFaqs.length > 0 ? (
-                            filteredFaqs.map((faq, index) => (
-                                <Accordion key={index} sx={{ mb: 1 }}>
-                                    <AccordionSummary expandIcon={<ExpandMore />}>
-                                        <Typography sx={{ fontWeight: 600 }}>{faq.question}</Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <Typography color="textSecondary">{faq.answer}</Typography>
-                                    </AccordionDetails>
-                                </Accordion>
-                            ))
-                        ) : (
-                            <Card>
-                                <CardContent>
-                                    <Typography color="textSecondary" textAlign="center">
-                                        No results found for &quot;{searchQuery}&quot;. Try a different search term or contact support.
+            <Grid container spacing={3}>
+                {/* Quick Links */}
+                <Grid item xs={12}>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+                        Quick Links
+                    </Typography>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
+                                <CardContent sx={{ textAlign: 'center' }}>
+                                    <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                        Video Tutorials
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Watch step-by-step guides
                                     </Typography>
                                 </CardContent>
                             </Card>
-                        )}
-                    </Grid>
+                        </Grid>
 
-                    {/* Contact Support */}
-                    <Grid item xs={12}>
-                        <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                                    Still Need Help?
-                                </Typography>
-                                <Typography variant="body2" sx={{ mb: 3 }}>
-                                    Our support team is available 24/7 to assist you with any questions or issues.
-                                </Typography>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12} sm={4}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Email />
-                                            <Box>
-                                                <Typography variant="caption" sx={{ opacity: 0.9 }}>Email</Typography>
-                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>support@capstack.com</Typography>
-                                            </Box>
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={12} sm={4}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Phone />
-                                            <Box>
-                                                <Typography variant="caption" sx={{ opacity: 0.9 }}>Phone</Typography>
-                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>+91 1800-123-4567</Typography>
-                                            </Box>
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={12} sm={4}>
-                                        <Button
-                                            variant="contained"
-                                            fullWidth
-                                            startIcon={<Chat />}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                color: 'primary.main',
-                                                '&:hover': { backgroundColor: 'rgba(255,255,255,0.9)' },
-                                            }}
-                                        >
-                                            Start Live Chat
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
+                                <CardContent sx={{ textAlign: 'center' }}>
+                                    <Article sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                        Documentation
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Read detailed guides
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
+                                <CardContent sx={{ textAlign: 'center' }}>
+                                    <Chat sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                        Live Chat
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Chat with support
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Card sx={{ cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }}>
+                                <CardContent sx={{ textAlign: 'center' }}>
+                                    <Email sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                        Email Support
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Get help via email
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Container>
-        </Layout>
+
+                {/* FAQs */}
+                <Grid item xs={12}>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+                        Frequently Asked Questions
+                    </Typography>
+                    {filteredFaqs.length > 0 ? (
+                        filteredFaqs.map((faq, index) => (
+                            <Accordion key={index} sx={{ mb: 1 }}>
+                                <AccordionSummary expandIcon={<ExpandMore />}>
+                                    <Typography sx={{ fontWeight: 600 }}>{faq.question}</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Typography color="textSecondary">{faq.answer}</Typography>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))
+                    ) : (
+                        <Card>
+                            <CardContent>
+                                <Typography color="textSecondary" textAlign="center">
+                                    No results found for &quot;{searchQuery}&quot;. Try a different search term or contact support.
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    )}
+                </Grid>
+
+                {/* Contact Support */}
+                <Grid item xs={12}>
+                    <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                        <CardContent>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                                Still Need Help?
+                            </Typography>
+                            <Typography variant="body2" sx={{ mb: 3 }}>
+                                Our support team is available 24/7 to assist you with any questions or issues.
+                            </Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={4}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Email />
+                                        <Box>
+                                            <Typography variant="caption" sx={{ opacity: 0.9 }}>Email</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>support@capstack.com</Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Phone />
+                                        <Box>
+                                            <Typography variant="caption" sx={{ opacity: 0.9 }}>Phone</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>+91 1800-123-4567</Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                    <Button
+                                        variant="contained"
+                                        fullWidth
+                                        startIcon={<Chat />}
+                                        sx={{
+                                            backgroundColor: 'white',
+                                            color: 'primary.main',
+                                            '&:hover': { backgroundColor: 'rgba(255,255,255,0.9)' },
+                                        }}
+                                    >
+                                        Start Live Chat
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
+        </Container>
     );
 };
 

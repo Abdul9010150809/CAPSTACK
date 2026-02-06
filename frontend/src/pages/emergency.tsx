@@ -332,7 +332,7 @@ export default function Emergency() {
                 <Typography variant="h6">Months Coverage</Typography>
               </Box>
               <Typography variant="h3" fontWeight="bold" color="success.main">
-                {status.monthsCoverage.toFixed(1)}
+                {(status?.monthsCoverage || 0).toFixed(1)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Target: {status.targetMonths} months
@@ -369,7 +369,7 @@ export default function Emergency() {
                 {depletionRisk.depletionRisk.toUpperCase()}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {depletionRisk.monthsUntilCritical.toFixed(1)} months safe
+                {(depletionRisk?.monthsUntilCritical || 0).toFixed(1)} months safe
               </Typography>
             </CardContent>
           </Card>
@@ -402,8 +402,8 @@ export default function Emergency() {
                       ))}
                     </Pie>
                     <RechartsTooltip formatter={(value: any) => {
-                      const num = typeof value === 'number' ? value : Number(value);
-                      if (Number.isNaN(num)) return [String(value ?? ''), ''];
+                      const num = typeof value === 'number' ? value : Number(value || 0);
+                      if (Number.isNaN(num)) return ["0.0 months", ''];
                       return [`${num.toFixed(1)} months`, ''];
                     }} />
                   </RechartsPie>
@@ -411,7 +411,7 @@ export default function Emergency() {
               </ClientOnly>
               <Box sx={{ textAlign: 'center', mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Current: {status.monthsCoverage.toFixed(1)} months | Target: {status.targetMonths} months
+                  Current: {(status?.monthsCoverage || 0).toFixed(1)} months | Target: {status?.targetMonths || 0} months
                 </Typography>
               </Box>
             </CardContent>
@@ -430,7 +430,7 @@ export default function Emergency() {
                   <RechartsBar data={simulationData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="scenario" />
-                    <YAxis tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`} />
+                    <YAxis tickFormatter={(value) => `₹${((value || 0) / 1000).toFixed(0)}k`} />
                     <RechartsTooltip formatter={(value, name) => [
                       name === 'required' ? `₹${Number(value || 0).toLocaleString()}` : `${value || 0} months`,
                       name === 'required' ? 'Required Amount' : 'Time to Build'

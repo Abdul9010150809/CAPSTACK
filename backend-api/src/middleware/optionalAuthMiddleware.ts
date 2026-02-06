@@ -17,7 +17,7 @@ export interface AuthenticatedRequest extends Request {
  * Optional authentication middleware
  * Allows guest access for basic features, but requires full auth for advanced features
  */
-export const optionalAuthMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const optionalAuthMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     // Allow preflight requests to pass
     if (req.method === "OPTIONS") {
@@ -46,14 +46,27 @@ export const optionalAuthMiddleware = (req: AuthenticatedRequest, res: Response,
 
     try {
       const decoded = jwt.verify(token, config.jwtSecret) as any;
-      req.userId = decoded.userId;
-      req.isGuest = decoded.isGuest || false;
-      req.user = {
-        id: decoded.userId?.toString() || "",
-        email: decoded.email || null,
-        name: decoded.name || "",
-        isGuest: decoded.isGuest || false
-      };
+      const userId = decoded.userId;
+
+      // Verify user exists in database (optional check for optional middleware)
+      const { query } = await import('../config/db');
+      const userResult = await query('SELECT id FROM users WHERE id = $1', [userId]);
+
+      if (userResult.rows.length > 0) {
+        req.userId = userId;
+        req.isGuest = decoded.isGuest || false;
+        req.user = {
+          id: userId.toString() || "",
+          email: decoded.email || null,
+          name: decoded.name || "",
+          isGuest: decoded.isGuest || false
+        };
+      } else {
+        // User in token doesn't exist - treat as guest
+        req.isGuest = true;
+        req.userId = undefined;
+        req.user = undefined;
+      }
     } catch (tokenError) {
       // Invalid token - allow as guest
       req.isGuest = true;
@@ -75,7 +88,7 @@ export const optionalAuthMiddleware = (req: AuthenticatedRequest, res: Response,
  * Middleware that requires full authentication (no guest access)
  * Use this for advanced features that require account creation
  */
-export const requireAuthMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const requireAuthMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     // Allow preflight requests to pass
     if (req.method === "OPTIONS") {
@@ -95,6 +108,7 @@ export const requireAuthMiddleware = (req: AuthenticatedRequest, res: Response, 
     }
 
     const decoded = jwt.verify(token, config.jwtSecret) as any;
+    const userId = decoded.userId;
 
     // Check if this is a guest token
     if (decoded.isGuest) {
@@ -104,7 +118,15 @@ export const requireAuthMiddleware = (req: AuthenticatedRequest, res: Response, 
       });
     }
 
-    req.userId = decoded.userId;
+    // Verify user exists in database (prevents errors after DB reset)
+    const { query } = await import('../config/db');
+    const userResult = await query('SELECT id FROM users WHERE id = $1', [userId]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: "Session expired or user not found. Please log in again." });
+    }
+
+    req.userId = userId;
     req.isGuest = false;
     req.user = {
       id: decoded.userId?.toString() || "",

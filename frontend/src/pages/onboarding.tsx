@@ -84,7 +84,7 @@ export default function Onboarding() {
 
     const monthlyIncome = parseFloat(formData.monthlyIncome);
     const monthlyExpenses = parseFloat(formData.monthlyExpenses);
-    
+
     if (monthlyIncome <= 0 || monthlyExpenses < 0) {
       setError("Income must be positive and expenses cannot be negative.");
       setLoading(false);
@@ -113,13 +113,17 @@ export default function Onboarding() {
         location: formData.location,
         industry: formData.industry,
         experience_years: parseInt(formData.experience) || 0,
+        age: parseInt(formData.experience) > 0 ? (20 + (parseInt(formData.experience) || 0)) : 30, // Rough estimate if not provided
         monthly_income: parseFloat(formData.monthlyIncome) || 0,
         monthly_expenses: parseFloat(formData.monthlyExpenses) || 0,
         emergency_fund: parseFloat(formData.emergencyFund) || 0,
+        total_debt: parseFloat(formData.totalDebt) || 0,
         savings_rate:
           ((parseFloat(formData.monthlyIncome) || 0) -
             (parseFloat(formData.monthlyExpenses) || 0)) /
-          (parseFloat(formData.monthlyIncome) || 1)
+          (parseFloat(formData.monthlyIncome) || 1),
+        risk_tolerance: 'medium', // Default to medium
+        job_stability_score: 7 // Default to 7
       });
 
       // 2️⃣ Create savings plan (optional)

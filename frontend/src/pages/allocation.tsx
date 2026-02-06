@@ -139,9 +139,9 @@ function generateSampleFallback(sample: any): AllocationData {
     },
     formulas: {
       sipCagr: sample.estimatedSipCagr || 10,
-      emergencyMonths: +(emergency / monthlyExpenses).toFixed(1),
-      debtToIncome: +(sample.totalDebt / monthlyIncome || 0).toFixed(2),
-      savingsRate: +(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100).toFixed(1),
+      emergencyMonths: +(emergency / (monthlyExpenses || 1)).toFixed(1),
+      debtToIncome: +(sample.totalDebt / (monthlyIncome || 1) || 0).toFixed(2),
+      savingsRate: +(((monthlyIncome - monthlyExpenses) / (monthlyIncome || 1)) * 100).toFixed(1),
       investmentRiskScore: sample.riskScore || 5,
       stabilityIndex: sample.stabilityIndex || 65
     }
@@ -469,7 +469,7 @@ export default function Allocation() {
                 <Typography variant="h6">Savings Rate</Typography>
               </Box>
               <Typography variant="h3" color="warning.main" fontWeight="bold">
-                {formulas.savingsRate.toFixed(1)}%
+                {(formulas?.savingsRate || 0).toFixed(1)}%
               </Typography>
               <LinearProgress
                 variant="determinate"
@@ -489,7 +489,7 @@ export default function Allocation() {
                 <Typography variant="h6">SIP CAGR Potential</Typography>
               </Box>
               <Typography variant="h3" color="info.main" fontWeight="bold">
-                {formulas.sipCagr.toFixed(1)}%
+                {(formulas?.sipCagr || 0).toFixed(1)}%
               </Typography>
               <Chip label="10 Year Projection" size="small" sx={{ mt: 1 }} />
             </CardContent>
@@ -542,7 +542,7 @@ export default function Allocation() {
                 <RechartsBar data={barData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="category" />
-                  <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                  <YAxis tickFormatter={(v) => `₹${((v || 0) / 1000).toFixed(0)}k`} />
                   <RechartsTooltip formatter={(v: any) => v != null ? `₹${Number(v).toLocaleString()}` : ''} />
                   <Bar dataKey="amount" fill={theme.palette.primary.main} />
                 </RechartsBar>

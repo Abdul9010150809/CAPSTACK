@@ -67,7 +67,22 @@ export const updateProfile = async (req: Request, res: Response) => {
       monthly_income,
       monthly_expenses,
       emergency_fund,
-      savings_rate
+      emergency_fund_balance,
+      savings_rate,
+      total_debt,
+      age,
+      risk_tolerance,
+      job_stability_score,
+      // Support camelCase for frontend flexibility
+      experienceYears,
+      monthlyIncome,
+      monthlyExpenses,
+      emergencyFund,
+      emergencyFundBalance,
+      savingsRate,
+      totalDebt,
+      riskTolerance,
+      jobStabilityScore
     } = req.body;
 
     // Update user basic info
@@ -102,14 +117,21 @@ export const updateProfile = async (req: Request, res: Response) => {
     const profileQuery = `
       INSERT INTO user_profiles (
         user_id, monthly_income, monthly_expenses, emergency_fund,
-        savings_rate, location, industry, experience_years, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        emergency_fund_balance, savings_rate, total_debt, age,
+        risk_tolerance, job_stability_score, location, industry, 
+        experience_years, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       ON CONFLICT (user_id)
       DO UPDATE SET
         monthly_income = EXCLUDED.monthly_income,
         monthly_expenses = EXCLUDED.monthly_expenses,
         emergency_fund = EXCLUDED.emergency_fund,
+        emergency_fund_balance = EXCLUDED.emergency_fund_balance,
         savings_rate = EXCLUDED.savings_rate,
+        total_debt = EXCLUDED.total_debt,
+        age = EXCLUDED.age,
+        risk_tolerance = EXCLUDED.risk_tolerance,
+        job_stability_score = EXCLUDED.job_stability_score,
         location = EXCLUDED.location,
         industry = EXCLUDED.industry,
         experience_years = EXCLUDED.experience_years,
@@ -118,13 +140,18 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     await query(profileQuery, [
       userId,
-      monthly_income || 0,
-      monthly_expenses || 0,
-      emergency_fund || 0,
-      savings_rate || 0,
+      monthly_income || monthlyIncome || 0,
+      monthly_expenses || monthlyExpenses || 0,
+      emergency_fund || emergencyFund || 0,
+      emergency_fund_balance || emergencyFundBalance || 0,
+      savings_rate || savingsRate || 0,
+      total_debt || totalDebt || 0,
+      age || 0,
+      risk_tolerance || riskTolerance || 'medium',
+      job_stability_score || jobStabilityScore || 5,
       location || null,
       industry || null,
-      experience_years || null,
+      experience_years || experienceYears || null,
       new Date(),
       new Date()
     ]);

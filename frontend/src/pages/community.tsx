@@ -92,226 +92,224 @@ const Community = () => {
     };
 
     return (
-        <Layout>
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
-                    👥 Community
-                </Typography>
-                <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
-                    Connect with others, share your journey, and learn from the community
-                </Typography>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+                👥 Community
+            </Typography>
+            <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
+                Connect with others, share your journey, and learn from the community
+            </Typography>
 
-                <Grid container spacing={3}>
-                    {/* Main Feed */}
-                    <Grid item xs={12} md={8}>
-                        {/* Create Post */}
-                        <Card sx={{ mb: 3 }}>
+            <Grid container spacing={3}>
+                {/* Main Feed */}
+                <Grid item xs={12} md={8}>
+                    {/* Create Post */}
+                    <Card sx={{ mb: 3 }}>
+                        <CardContent>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                                Share with the Community
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={3}
+                                placeholder="Share your success, ask a question, or give advice..."
+                                value={newPost}
+                                onChange={(e) => setNewPost(e.target.value)}
+                                sx={{ mb: 2 }}
+                            />
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                    <Chip label="Success Story" size="small" clickable />
+                                    <Chip label="Question" size="small" clickable />
+                                    <Chip label="Tip" size="small" clickable />
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<Add />}
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    }}
+                                >
+                                    Post
+                                </Button>
+                            </Box>
+                        </CardContent>
+                    </Card>
+
+                    {/* Posts Feed */}
+                    {posts.map((post) => (
+                        <Card key={post.id} sx={{ mb: 3 }}>
                             <CardContent>
-                                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                                    Share with the Community
-                                </Typography>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    placeholder="Share your success, ask a question, or give advice..."
-                                    value={newPost}
-                                    onChange={(e) => setNewPost(e.target.value)}
-                                    sx={{ mb: 2 }}
-                                />
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Box sx={{ display: 'flex', gap: 1 }}>
-                                        <Chip label="Success Story" size="small" clickable />
-                                        <Chip label="Question" size="small" clickable />
-                                        <Chip label="Tip" size="small" clickable />
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                    <Avatar sx={{ mr: 2, bgcolor: '#667eea' }}>{post.avatar}</Avatar>
+                                    <Box sx={{ flexGrow: 1 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                            {post.author}
+                                        </Typography>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {post.timestamp}
+                                        </Typography>
                                     </Box>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<Add />}
+                                    <Chip
+                                        label={post.category}
+                                        size="small"
                                         sx={{
-                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            backgroundColor: getCategoryColor(post.category),
+                                            color: 'white',
+                                            fontWeight: 600,
                                         }}
+                                    />
+                                </Box>
+
+                                <Typography variant="body1" sx={{ mb: 2 }}>
+                                    {post.content}
+                                </Typography>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                <Box sx={{ display: 'flex', gap: 3 }}>
+                                    <Button
+                                        startIcon={<ThumbUp />}
+                                        size="small"
+                                        sx={{ color: 'text.secondary' }}
                                     >
-                                        Post
+                                        {post.likes} Likes
+                                    </Button>
+                                    <Button
+                                        startIcon={<Comment />}
+                                        size="small"
+                                        sx={{ color: 'text.secondary' }}
+                                    >
+                                        {post.comments} Comments
+                                    </Button>
+                                    <Button
+                                        startIcon={<Share />}
+                                        size="small"
+                                        sx={{ color: 'text.secondary' }}
+                                    >
+                                        Share
                                     </Button>
                                 </Box>
                             </CardContent>
                         </Card>
-
-                        {/* Posts Feed */}
-                        {posts.map((post) => (
-                            <Card key={post.id} sx={{ mb: 3 }}>
-                                <CardContent>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                        <Avatar sx={{ mr: 2, bgcolor: '#667eea' }}>{post.avatar}</Avatar>
-                                        <Box sx={{ flexGrow: 1 }}>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                                {post.author}
-                                            </Typography>
-                                            <Typography variant="caption" color="textSecondary">
-                                                {post.timestamp}
-                                            </Typography>
-                                        </Box>
-                                        <Chip
-                                            label={post.category}
-                                            size="small"
-                                            sx={{
-                                                backgroundColor: getCategoryColor(post.category),
-                                                color: 'white',
-                                                fontWeight: 600,
-                                            }}
-                                        />
-                                    </Box>
-
-                                    <Typography variant="body1" sx={{ mb: 2 }}>
-                                        {post.content}
-                                    </Typography>
-
-                                    <Divider sx={{ my: 2 }} />
-
-                                    <Box sx={{ display: 'flex', gap: 3 }}>
-                                        <Button
-                                            startIcon={<ThumbUp />}
-                                            size="small"
-                                            sx={{ color: 'text.secondary' }}
-                                        >
-                                            {post.likes} Likes
-                                        </Button>
-                                        <Button
-                                            startIcon={<Comment />}
-                                            size="small"
-                                            sx={{ color: 'text.secondary' }}
-                                        >
-                                            {post.comments} Comments
-                                        </Button>
-                                        <Button
-                                            startIcon={<Share />}
-                                            size="small"
-                                            sx={{ color: 'text.secondary' }}
-                                        >
-                                            Share
-                                        </Button>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </Grid>
-
-                    {/* Sidebar */}
-                    <Grid item xs={12} md={4}>
-                        {/* Community Stats */}
-                        <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                            <CardContent>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                    <People sx={{ mr: 1 }} />
-                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                        Community Stats
-                                    </Typography>
-                                </Box>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            12.5K
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                            Members
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            850
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                            Active Today
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            3.2K
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                            Posts
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                            15K
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                            Comments
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-
-                        {/* Leaderboard */}
-                        <Card>
-                            <CardContent>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                    <EmojiEvents sx={{ mr: 1, color: '#f59e0b' }} />
-                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                        Top Contributors
-                                    </Typography>
-                                </Box>
-                                {leaderboard.map((user) => (
-                                    <Box
-                                        key={user.rank}
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            mb: 2,
-                                            p: 1,
-                                            borderRadius: 2,
-                                            '&:hover': { backgroundColor: 'action.hover' },
-                                        }}
-                                    >
-                                        <Typography
-                                            variant="h6"
-                                            sx={{ mr: 2, fontWeight: 700, minWidth: 30, color: 'text.secondary' }}
-                                        >
-                                            #{user.rank}
-                                        </Typography>
-                                        <Avatar sx={{ mr: 2, bgcolor: '#667eea' }}>{user.avatar}</Avatar>
-                                        <Box sx={{ flexGrow: 1 }}>
-                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                {user.name}
-                                            </Typography>
-                                            <Typography variant="caption" color="textSecondary">
-                                                {user.badge}
-                                            </Typography>
-                                        </Box>
-                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                            {user.score}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </CardContent>
-                        </Card>
-
-                        {/* Trending Topics */}
-                        <Card sx={{ mt: 3 }}>
-                            <CardContent>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                    <TrendingUp sx={{ mr: 1 }} />
-                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                        Trending Topics
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                    <Chip label="#DebtFree" clickable />
-                                    <Chip label="#InvestingTips" clickable />
-                                    <Chip label="#BudgetingHacks" clickable />
-                                    <Chip label="#FinancialGoals" clickable />
-                                    <Chip label="#RetirementPlanning" clickable />
-                                    <Chip label="#TaxSaving" clickable />
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Grid>
+                    ))}
                 </Grid>
-            </Container>
-        </Layout>
+
+                {/* Sidebar */}
+                <Grid item xs={12} md={4}>
+                    {/* Community Stats */}
+                    <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                        <CardContent>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                <People sx={{ mr: 1 }} />
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    Community Stats
+                                </Typography>
+                            </Box>
+                            <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                    <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                                        12.5K
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                        Members
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                                        850
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                        Active Today
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                                        3.2K
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                        Posts
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                                        15K
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                        Comments
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+
+                    {/* Leaderboard */}
+                    <Card>
+                        <CardContent>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                <EmojiEvents sx={{ mr: 1, color: '#f59e0b' }} />
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    Top Contributors
+                                </Typography>
+                            </Box>
+                            {leaderboard.map((user) => (
+                                <Box
+                                    key={user.rank}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        mb: 2,
+                                        p: 1,
+                                        borderRadius: 2,
+                                        '&:hover': { backgroundColor: 'action.hover' },
+                                    }}
+                                >
+                                    <Typography
+                                        variant="h6"
+                                        sx={{ mr: 2, fontWeight: 700, minWidth: 30, color: 'text.secondary' }}
+                                    >
+                                        #{user.rank}
+                                    </Typography>
+                                    <Avatar sx={{ mr: 2, bgcolor: '#667eea' }}>{user.avatar}</Avatar>
+                                    <Box sx={{ flexGrow: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                            {user.name}
+                                        </Typography>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {user.badge}
+                                        </Typography>
+                                    </Box>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                        {user.score}
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </CardContent>
+                    </Card>
+
+                    {/* Trending Topics */}
+                    <Card sx={{ mt: 3 }}>
+                        <CardContent>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                <TrendingUp sx={{ mr: 1 }} />
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    Trending Topics
+                                </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                <Chip label="#DebtFree" clickable />
+                                <Chip label="#InvestingTips" clickable />
+                                <Chip label="#BudgetingHacks" clickable />
+                                <Chip label="#FinancialGoals" clickable />
+                                <Chip label="#RetirementPlanning" clickable />
+                                <Chip label="#TaxSaving" clickable />
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
+        </Container>
     );
 };
 

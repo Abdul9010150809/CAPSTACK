@@ -55,7 +55,13 @@ export const setupDatabase = async () => {
     await query(passwordReset);
     console.log('Password reset migration applied');
 
+    // Read and execute schema sync for missing columns
+    const syncSchema = readFileSync(join(__dirname, '../../../database/migrations/006_sync_schema_with_service.sql'), 'utf8');
+    await query(syncSchema);
+    console.log('Schema sync with service logic applied');
+
     console.log('Database setup complete!');
+    process.exit(0);
   } catch (error) {
     console.error('Database setup failed:', error);
     process.exit(1);

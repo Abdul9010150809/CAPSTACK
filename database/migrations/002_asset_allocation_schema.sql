@@ -22,16 +22,16 @@ CREATE TABLE asset_allocations (
     lifestyle_percentage DECIMAL(5,2) NOT NULL DEFAULT 25.00, -- 20-40%
     emergency_fund_percentage DECIMAL(5,2) NOT NULL DEFAULT 10.00, -- auto-adjusted
     monthly_income DECIMAL(12,2) NOT NULL,
-    allocated_sip DECIMAL(12,2) NOT NULL DEFAULT 0,
-    allocated_stocks DECIMAL(12,2) NOT NULL DEFAULT 0,
-    allocated_bonds DECIMAL(12,2) NOT NULL DEFAULT 0,
-    allocated_lifestyle DECIMAL(12,2) NOT NULL DEFAULT 0,
-    allocated_emergency DECIMAL(12,2) NOT NULL DEFAULT 0,
+    sip_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
+    stocks_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
+    bonds_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
+    lifestyle_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
+    emergency_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
     market_risk VARCHAR(10) NOT NULL DEFAULT 'medium' CHECK (market_risk IN ('low', 'medium', 'high')),
     inflation_rate DECIMAL(5,2) DEFAULT 6.00,
-    job_stability_score DECIMAL(5,2) DEFAULT 7.00,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    reasoning TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Emergency Fund Monitoring
@@ -43,6 +43,8 @@ CREATE TABLE emergency_fund_monitoring (
     monthly_burn_rate DECIMAL(12,2) NOT NULL DEFAULT 0,
     months_coverage DECIMAL(5,2) NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'insufficient' CHECK (status IN ('excellent', 'good', 'adequate', 'insufficient', 'critical')),
+    recommended_action TEXT,
+    alerts JSONB,
     last_alert_sent TIMESTAMP,
     auto_adjustment_enabled BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

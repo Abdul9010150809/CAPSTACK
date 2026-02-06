@@ -126,224 +126,222 @@ const EducationHub = () => {
     };
 
     return (
-        <Layout>
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
-                    📚 Financial Education Hub
-                </Typography>
-                <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
-                    Expand your financial knowledge with courses, articles, and video tutorials
-                </Typography>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+                📚 Financial Education Hub
+            </Typography>
+            <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
+                Expand your financial knowledge with courses, articles, and video tutorials
+            </Typography>
 
-                {/* Search Bar */}
-                <TextField
-                    fullWidth
-                    placeholder="Search courses, articles, or topics..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    sx={{ mb: 4 }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Search />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
+            {/* Search Bar */}
+            <TextField
+                fullWidth
+                placeholder="Search courses, articles, or topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ mb: 4 }}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <Search />
+                        </InputAdornment>
+                    ),
+                }}
+            />
 
-                {/* Tabs */}
-                <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} sx={{ mb: 4 }}>
-                    <Tab label="Courses" icon={<School />} iconPosition="start" />
-                    <Tab label="Articles" icon={<Article />} iconPosition="start" />
-                    <Tab label="Videos" icon={<PlayCircle />} iconPosition="start" />
-                </Tabs>
+            {/* Tabs */}
+            <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} sx={{ mb: 4 }}>
+                <Tab label="Courses" icon={<School />} iconPosition="start" />
+                <Tab label="Articles" icon={<Article />} iconPosition="start" />
+                <Tab label="Videos" icon={<PlayCircle />} iconPosition="start" />
+            </Tabs>
 
-                {/* Courses Tab */}
-                {activeTab === 0 && (
-                    <Grid container spacing={3}>
-                        {courses.map((course) => (
-                            <Grid item xs={12} md={6} key={course.id}>
-                                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                    <Box
-                                        sx={{
-                                            height: 200,
-                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'white',
-                                        }}
-                                    >
-                                        <School sx={{ fontSize: 80, opacity: 0.3 }} />
-                                    </Box>
-                                    <CardContent sx={{ flexGrow: 1 }}>
-                                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                                            <Chip
-                                                label={course.level}
-                                                size="small"
-                                                sx={{
-                                                    backgroundColor: getLevelColor(course.level),
-                                                    color: 'white',
-                                                    fontWeight: 600,
-                                                }}
-                                            />
-                                            <Chip
-                                                label={course.duration}
-                                                size="small"
-                                                icon={<Timer />}
-                                                variant="outlined"
-                                            />
-                                        </Box>
-                                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                                            {course.title}
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                                            {course.description}
-                                        </Typography>
-                                        {course.progress > 0 && (
-                                            <Box sx={{ mb: 2 }}>
-                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                                    <Typography variant="caption" color="textSecondary">
-                                                        Progress
-                                                    </Typography>
-                                                    <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                                        {course.progress}%
-                                                    </Typography>
-                                                </Box>
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={course.progress}
-                                                    sx={{ height: 8, borderRadius: 4 }}
-                                                />
-                                            </Box>
-                                        )}
-                                        <Button
-                                            fullWidth
-                                            variant={course.progress > 0 ? 'outlined' : 'contained'}
-                                            sx={{
-                                                background: course.progress === 0 ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : undefined,
-                                            }}
-                                        >
-                                            {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
-                )}
-
-                {/* Articles Tab */}
-                {activeTab === 1 && (
-                    <Grid container spacing={3}>
-                        {articles.map((article) => (
-                            <Grid item xs={12} md={6} key={article.id}>
-                                <Card sx={{ height: '100%', '&:hover': { boxShadow: 6 }, cursor: 'pointer' }}>
-                                    <CardContent>
-                                        <Chip label={article.category} size="small" sx={{ mb: 2 }} />
-                                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                                            {article.title}
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                                            {article.excerpt}
-                                        </Typography>
-                                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                            <Typography variant="caption" color="textSecondary">
-                                                {article.readTime} read
-                                            </Typography>
-                                            <Typography variant="caption" color="textSecondary">
-                                                •
-                                            </Typography>
-                                            <Typography variant="caption" color="textSecondary">
-                                                {new Date(article.date).toLocaleDateString()}
-                                            </Typography>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
-                )}
-
-                {/* Videos Tab */}
-                {activeTab === 2 && (
-                    <Grid container spacing={3}>
-                        {videos.map((video) => (
-                            <Grid item xs={12} sm={6} md={3} key={video.id}>
-                                <Card sx={{ '&:hover': { boxShadow: 6 }, cursor: 'pointer' }}>
-                                    <Box
-                                        sx={{
-                                            height: 180,
-                                            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            position: 'relative',
-                                        }}
-                                    >
-                                        <PlayCircle sx={{ fontSize: 60, color: 'white', opacity: 0.9 }} />
+            {/* Courses Tab */}
+            {activeTab === 0 && (
+                <Grid container spacing={3}>
+                    {courses.map((course) => (
+                        <Grid item xs={12} md={6} key={course.id}>
+                            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                <Box
+                                    sx={{
+                                        height: 200,
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'white',
+                                    }}
+                                >
+                                    <School sx={{ fontSize: 80, opacity: 0.3 }} />
+                                </Box>
+                                <CardContent sx={{ flexGrow: 1 }}>
+                                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                                         <Chip
-                                            label={video.duration}
+                                            label={course.level}
                                             size="small"
                                             sx={{
-                                                position: 'absolute',
-                                                bottom: 8,
-                                                right: 8,
-                                                backgroundColor: 'rgba(0,0,0,0.7)',
+                                                backgroundColor: getLevelColor(course.level),
                                                 color: 'white',
+                                                fontWeight: 600,
                                             }}
                                         />
+                                        <Chip
+                                            label={course.duration}
+                                            size="small"
+                                            icon={<Timer />}
+                                            variant="outlined"
+                                        />
                                     </Box>
-                                    <CardContent>
-                                        <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-                                            {video.title}
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                                        {course.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                        {course.description}
+                                    </Typography>
+                                    {course.progress > 0 && (
+                                        <Box sx={{ mb: 2 }}>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                                <Typography variant="caption" color="textSecondary">
+                                                    Progress
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                                    {course.progress}%
+                                                </Typography>
+                                            </Box>
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={course.progress}
+                                                sx={{ height: 8, borderRadius: 4 }}
+                                            />
+                                        </Box>
+                                    )}
+                                    <Button
+                                        fullWidth
+                                        variant={course.progress > 0 ? 'outlined' : 'contained'}
+                                        sx={{
+                                            background: course.progress === 0 ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : undefined,
+                                        }}
+                                    >
+                                        {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
+
+            {/* Articles Tab */}
+            {activeTab === 1 && (
+                <Grid container spacing={3}>
+                    {articles.map((article) => (
+                        <Grid item xs={12} md={6} key={article.id}>
+                            <Card sx={{ height: '100%', '&:hover': { boxShadow: 6 }, cursor: 'pointer' }}>
+                                <CardContent>
+                                    <Chip label={article.category} size="small" sx={{ mb: 2 }} />
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                                        {article.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                        {article.excerpt}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {article.readTime} read
                                         </Typography>
                                         <Typography variant="caption" color="textSecondary">
-                                            {video.views} views
+                                            •
                                         </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
-                )}
-
-                {/* Learning Stats */}
-                <Card sx={{ mt: 4, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                    <CardContent>
-                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                            📊 Your Learning Progress
-                        </Typography>
-                        <Grid container spacing={3} sx={{ mt: 1 }}>
-                            <Grid item xs={12} sm={4}>
-                                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                    2
-                                </Typography>
-                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                    Courses in Progress
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={4}>
-                                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                    12
-                                </Typography>
-                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                    Articles Read
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={4}>
-                                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                                    8
-                                </Typography>
-                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                    Videos Watched
-                                </Typography>
-                            </Grid>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {new Date(article.date).toLocaleDateString()}
+                                        </Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
                         </Grid>
-                    </CardContent>
-                </Card>
-            </Container>
-        </Layout>
+                    ))}
+                </Grid>
+            )}
+
+            {/* Videos Tab */}
+            {activeTab === 2 && (
+                <Grid container spacing={3}>
+                    {videos.map((video) => (
+                        <Grid item xs={12} sm={6} md={3} key={video.id}>
+                            <Card sx={{ '&:hover': { boxShadow: 6 }, cursor: 'pointer' }}>
+                                <Box
+                                    sx={{
+                                        height: 180,
+                                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        position: 'relative',
+                                    }}
+                                >
+                                    <PlayCircle sx={{ fontSize: 60, color: 'white', opacity: 0.9 }} />
+                                    <Chip
+                                        label={video.duration}
+                                        size="small"
+                                        sx={{
+                                            position: 'absolute',
+                                            bottom: 8,
+                                            right: 8,
+                                            backgroundColor: 'rgba(0,0,0,0.7)',
+                                            color: 'white',
+                                        }}
+                                    />
+                                </Box>
+                                <CardContent>
+                                    <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                                        {video.title}
+                                    </Typography>
+                                    <Typography variant="caption" color="textSecondary">
+                                        {video.views} views
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
+
+            {/* Learning Stats */}
+            <Card sx={{ mt: 4, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                <CardContent>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                        📊 Your Learning Progress
+                    </Typography>
+                    <Grid container spacing={3} sx={{ mt: 1 }}>
+                        <Grid item xs={12} sm={4}>
+                            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                                2
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                Courses in Progress
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                                12
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                Articles Read
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                                8
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                Videos Watched
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
+        </Container>
     );
 };
 
