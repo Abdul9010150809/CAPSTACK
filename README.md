@@ -44,6 +44,7 @@ Designed for the **Datanyx 2025 International Hackathon**, this edition features
 > **📚 Comprehensive Implementation Guides:**
 > - [🔒 Cybersecurity & Blockchain Guide](./docs/CYBERSECURITY_BLOCKCHAIN_GUIDE.md) — Complete security architecture, smart contracts, compliance
 > - [📋 Implementation Summary](./docs/IMPLEMENTATION_SUMMARY.md) — What's built, how to use it, performance metrics
+> - [🚀 Render Deployment Guide](.agent/workflows/deploy-render.md) — Step-by-step instructions for Render Cloud
 
 ---
 
@@ -80,7 +81,7 @@ The application is fully deployed and production-ready on the **Render Cloud Pla
 | **⚙️ API Server** | **[View API](https://capstack-2k25-backend.onrender.com/)** | RESTful backend services |
 | **🧠 Docs** | **[Live Docs](https://capstack-2k25-backend.onrender.com/docs)** | Interactive API documentation |
 
-**Deployment Note:** Deployed on Render using native builds (no Docker). Frontend and backend are separate Render web services with automated build & deploy from `main`.
+**Deployment Note:** Deployed on Render using native builds. Frontend and backend are separate services with automated Blueprint management. See the [full deployment guide](.agent/workflows/deploy-render.md).
 
 ---
 
