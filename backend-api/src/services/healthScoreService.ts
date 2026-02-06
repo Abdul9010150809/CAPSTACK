@@ -30,7 +30,7 @@ export const calculateHealthScore = async (userId: number): Promise<HealthScoreR
   const cacheKey = `health_score_${userId}`;
 
   // Check cache first
-  const cachedResult = await cache.get(cacheKey);
+  const cachedResult = await cache.get(cacheKey) as HealthScoreResult | null;
   if (cachedResult) {
     return cachedResult;
   }

@@ -11,7 +11,7 @@ interface InMemoryUser {
   updatedAt: Date;
 }
 
-let inMemoryUsers: InMemoryUser[] = [];
+const inMemoryUsers: InMemoryUser[] = [];
 let nextUserId = 1;
 let useInMemory = false;
 

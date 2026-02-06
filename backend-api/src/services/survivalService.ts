@@ -68,9 +68,9 @@ export const calculateSurvivalFromInputs = (inputs: SurvivalInputs): SurvivalRes
   const {
     emergencyFund,
     monthlyExpenses,
-    monthlyIncome,
+    monthlyIncome: _monthlyIncome,
     incomeStability,
-    hasSideIncome,
+    hasSideIncome: _hasSideIncome,
     dependents,
     location,
     jobSecurity

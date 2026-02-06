@@ -89,12 +89,36 @@ Thumbs.db
 *.swo
 
 # ---------------------------
+# DATA & DATASETS
+# ---------------------------
+dataset/
+data/
+*.csv
+*.json
+!package.json
+!tsconfig.json
+
+# ---------------------------
+# PYTHON
+# ---------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+python/
+
+# ---------------------------
 # MISC
 # ---------------------------
-# ALLOW LOCK FILES — DO NOT IGNORE
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
-
 .Dockerfile.swp
-venv/
+.next/
+.turbo/
+.vercel/
+node_modules/
+dist/
+build/
+.env*
+!.env.example

@@ -13,6 +13,10 @@ import { metricsMiddleware, getMetrics } from "./utils/metrics";
 import { config } from "./config/env";
 import { optionalAuthMiddleware } from "./middleware/optionalAuthMiddleware";
 import { getBenchmark } from "./controllers/financeController";
+import { compressionMiddleware } from "./middleware/compression";
+import { performanceMiddleware, getPerformanceMetrics } from "./middleware/performance";
+import { cacheService } from "./config/cache";
+import insightsRoutes from "./routes/insightsRoutes";
 
 dotenv.config();
 
@@ -74,6 +78,15 @@ app.use(
 app.options("*", cors());
 
 // ----------------------------------
+// Performance Middleware
+// ----------------------------------
+// Compression should be early in the middleware chain
+app.use(compressionMiddleware);
+
+// Performance monitoring
+app.use(performanceMiddleware);
+
+// ----------------------------------
 // Middleware
 // ----------------------------------
 
@@ -122,6 +135,7 @@ app.use("/auth", authRoutes);
 app.use("/finance", financeRoutes);
 app.use("/savings", savingsRoutes);
 app.use("/user", userRoutes);
+app.use("/api/insights", insightsRoutes);
 
 // ----------------------------------
 // API Aliases (compat with frontend paths)
@@ -143,9 +157,13 @@ app.get("/", (req, res) => {
       finance: "/finance",
       savings: "/savings",
       user: "/user",
+      metrics: "/api/metrics/performance",
     },
   });
 });
+
+// Performance metrics endpoint
+app.get("/api/metrics/performance", getPerformanceMetrics);
 
 // ----------------------------------
 // Error Handling
@@ -164,16 +182,40 @@ if (config.sentryDsn) {
 // ----------------------------------
 // Server Startup
 // ----------------------------------
+// Initialize cache connection
+(async () => {
+  try {
+    if (process.env.REDIS_ENABLED !== 'false') {
+      await cacheService.connect();
+      logger.info('✅ Redis cache connected');
+    } else {
+      logger.info('ℹ️  Redis cache disabled');
+    }
+  } catch (error) {
+    logger.warn('⚠️  Redis connection failed, running without cache');
+    logger.warn(`Redis error: ${error}`);
+  }
+})();
+
 const server = app.listen(PORT, () => {
   logger.info(`✅ Server running on port ${PORT}`);
   logger.info(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`🌍 Allowed origins: ${allowedOrigins.join(', ')}`);
+  logger.info(`⚡ Performance monitoring enabled`);
+  logger.info(`🗜️  Response compression enabled`);
 });
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
   logger.warn("SIGTERM received, shutting down gracefully");
-  server.close(() => {
+  server.close(async () => {
+    // Disconnect from Redis
+    try {
+      await cacheService.disconnect();
+      logger.info("Redis disconnected");
+    } catch (error) {
+      logger.warn("Error disconnecting Redis");
+    }
     logger.info("Server shut down");
     process.exit(0);
   });
@@ -181,7 +223,14 @@ process.on("SIGTERM", () => {
 
 process.on("SIGINT", () => {
   logger.warn("SIGINT received, shutting down gracefully");
-  server.close(() => {
+  server.close(async () => {
+    // Disconnect from Redis
+    try {
+      await cacheService.disconnect();
+      logger.info("Redis disconnected");
+    } catch (error) {
+      logger.warn("Error disconnecting Redis");
+    }
     logger.info("Server shut down");
     process.exit(0);
   });

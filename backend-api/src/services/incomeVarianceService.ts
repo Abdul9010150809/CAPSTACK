@@ -157,7 +157,7 @@ const calculateGrowthScore = (data: IncomeData): number => {
   const { growthRate, experience, industry } = data;
 
   // Base score from growth rate
-  let growthScore = Math.min(100, growthRate * 1000); // 10% growth = 100 score
+  const growthScore = Math.min(100, growthRate * 1000); // 10% growth = 100 score
 
   // Adjust for experience (more experience = higher potential)
   const experienceMultiplier = Math.min(1.5, 1 + (experience * 0.05));

@@ -31,64 +31,17 @@ import {
   Shield,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
-  KeyboardArrowDown
+  KeyboardArrowDown,
+  AccountBalanceWallet,
+  TrackChanges,
+  ShowChart,
+  Calculate,
+  School,
+  People,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
-import { styled } from '@mui/material/styles';
-
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(240, 248, 255, 0.5) 100%)',
-  backdropFilter: 'blur(10px)',
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-  color: theme.palette.text.primary,
-}));
-
-const NavButton = styled(Button)(({ theme }) => ({
-  textTransform: 'none',
-  fontSize: '0.95rem',
-  fontWeight: 500,
-  color: theme.palette.text.primary,
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  position: 'relative',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: -4,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: 0,
-    height: 2,
-    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-    transition: 'width 0.3s ease',
-    borderRadius: '2px',
-  },
-  '&:hover::after': {
-    width: '80%',
-  },
-  '&.active': {
-    color: theme.palette.primary.main,
-    fontWeight: 600,
-    '&::after': {
-      width: '80%',
-    },
-  },
-}));
-
-const UserMenuButton = styled(Button)(({ theme }) => ({
-  textTransform: 'none',
-  padding: '6px 12px',
-  borderRadius: 8,
-  backgroundColor: alpha(theme.palette.primary.main, 0.08),
-  color: theme.palette.text.primary,
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.15),
-  },
-}));
-
 const Navigation = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -96,6 +49,7 @@ const Navigation = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = React.useState<null | HTMLElement>(null);
   const { user, isAuthenticated, logout } = useAuth();
+
 
   const handleLogout = () => {
     logout();
@@ -114,9 +68,17 @@ const Navigation = () => {
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: <Dashboard sx={{ fontSize: 20 }} /> },
     { label: 'Assessment', href: '/assessment', icon: <Assessment sx={{ fontSize: 20 }} /> },
+    { label: 'Budget', href: '/budget-planner', icon: <AccountBalanceWallet sx={{ fontSize: 20 }} /> },
+    { label: 'Goals', href: '/goals', icon: <TrackChanges sx={{ fontSize: 20 }} /> },
+    { label: 'Portfolio', href: '/portfolio', icon: <ShowChart sx={{ fontSize: 20 }} /> },
+    { label: 'Debt', href: '/debt-dashboard', icon: <PieChart sx={{ fontSize: 20 }} /> },
     { label: 'Allocation', href: '/allocation', icon: <PieChart sx={{ fontSize: 20 }} /> },
     { label: 'Emergency', href: '/emergency', icon: <Shield sx={{ fontSize: 20 }} /> },
     { label: 'Savings', href: '/savings', icon: <Savings sx={{ fontSize: 20 }} /> },
+    { label: 'Tax', href: '/tax-calculator', icon: <Calculate sx={{ fontSize: 20 }} /> },
+    { label: 'Reports', href: '/reports', icon: <Assessment sx={{ fontSize: 20 }} /> },
+    { label: 'Education', href: '/education', icon: <School sx={{ fontSize: 20 }} /> },
+    { label: 'Community', href: '/community', icon: <People sx={{ fontSize: 20 }} /> },
     { label: 'Insights', href: '/insights', icon: <Insights sx={{ fontSize: 20 }} /> },
   ];
 
@@ -216,7 +178,17 @@ const Navigation = () => {
 
   return (
     <>
-      <StyledAppBar position="sticky" elevation={0}>
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{
+          background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(240, 248, 255, 0.5) 100%)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+          color: (theme) => theme.palette.text.primary,
+        }}
+      >
         <Toolbar sx={{ py: 1 }}>
           {/* Logo */}
           <Typography
@@ -265,16 +237,34 @@ const Navigation = () => {
                 <Box sx={{ flexGrow: 1, display: 'flex', gap: 0.5 }}>
                   {navItems.map((item) => (
                     <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-                      <NavButton
+                      <Button
                         startIcon={item.icon}
-                        className={router.pathname === item.href ? 'active' : ''}
                         sx={{
-                          color: router.pathname === item.href ? 'primary.main' : 'text.primary',
-                          fontWeight: router.pathname === item.href ? 600 : 500,
+                          textTransform: 'none',
+                          fontSize: '0.95rem',
+                          fontWeight: (router.pathname === item.href ? 600 : 500),
+                          color: (router.pathname === item.href ? 'primary.main' : 'text.primary'),
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          position: 'relative',
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            bottom: -4,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: (router.pathname === item.href ? '80%' : 0),
+                            height: 2,
+                            background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                            transition: 'width 0.3s ease',
+                            borderRadius: '2px',
+                          },
+                          '&:hover::after': {
+                            width: '80%',
+                          },
                         }}
                       >
                         {item.label}
-                      </NavButton>
+                      </Button>
                     </Link>
                   ))}
                 </Box>
@@ -283,9 +273,20 @@ const Navigation = () => {
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 {isAuthenticated ? (
                   <>
-                    <UserMenuButton
+                    <Button
                       onClick={handleUserMenuOpen}
                       endIcon={<KeyboardArrowDown sx={{ fontSize: 18 }} />}
+                      sx={{
+                        textTransform: 'none',
+                        padding: '6px 12px',
+                        borderRadius: 2,
+                        backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                        color: (theme) => theme.palette.text.primary,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.15),
+                        },
+                      }}
                     >
                       <Avatar sx={{ width: 28, height: 28, mr: 1, fontSize: '0.9rem', background: 'linear-gradient(135deg, #007AF7 0%, #6C63FF 100%)' }}>
                         {user?.email?.charAt(0).toUpperCase()}
@@ -293,7 +294,7 @@ const Navigation = () => {
                       <Typography variant="body2" sx={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {user?.email || 'User'}
                       </Typography>
-                    </UserMenuButton>
+                    </Button>
                     <Menu
                       anchorEl={userMenuAnchor}
                       open={Boolean(userMenuAnchor)}
@@ -319,6 +320,10 @@ const Navigation = () => {
                       <MenuItem onClick={handleUserMenuClose} component={Link} href="/dashboard">
                         <Dashboard sx={{ mr: 1, fontSize: 20 }} />
                         Dashboard
+                      </MenuItem>
+                      <MenuItem onClick={handleUserMenuClose} component={Link} href="/settings">
+                        <SettingsIcon sx={{ mr: 1, fontSize: 20 }} />
+                        Settings
                       </MenuItem>
                       <Divider />
                       <MenuItem onClick={handleLogout}>
@@ -357,7 +362,7 @@ const Navigation = () => {
             </>
           )}
         </Toolbar>
-      </StyledAppBar>
+      </AppBar>
 
       {/* Mobile Drawer */}
       <Drawer

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { Request, Response, NextFunction } from 'express';
 
 const logsDir = path.join(process.cwd(), 'logs');
 
@@ -13,9 +14,9 @@ const getTimestamp = (): string => {
   return new Date().toISOString();
 };
 
-const sanitizeData = (data: any): any => {
+const sanitizeData = (data: unknown): unknown => {
   if (typeof data === 'object' && data !== null) {
-    const sanitized = { ...data };
+    const sanitized = { ...data } as Record<string, unknown>;
     // Remove sensitive fields
     const sensitiveFields = ['password', 'token', 'authorization', 'apiKey', 'secret'];
     sensitiveFields.forEach(field => {
@@ -28,7 +29,7 @@ const sanitizeData = (data: any): any => {
   return data;
 };
 
-const formatMessage = (level: string, data: any, requestId?: string): string => {
+const formatMessage = (level: string, data: unknown, requestId?: string): string => {
   const timestamp = getTimestamp();
   const logEntry = {
     timestamp,
@@ -39,7 +40,7 @@ const formatMessage = (level: string, data: any, requestId?: string): string => 
   return JSON.stringify(logEntry);
 };
 
-const writeLog = (level: string, data: any, requestId?: string): void => {
+const writeLog = (level: string, data: unknown, requestId?: string): void => {
   const message = formatMessage(level, data, requestId);
   const logFile = path.join(logsDir, `${level.toLowerCase()}.log`);
   const allLogsFile = path.join(logsDir, 'all.log');
@@ -72,7 +73,11 @@ export const logger = {
 };
 
 // Middleware to add request ID
-export const requestIdMiddleware = (req: any, res: any, next: any) => {
+export interface RequestWithId extends Request {
+  requestId?: string;
+}
+
+export const requestIdMiddleware = (req: RequestWithId, _res: Response, next: NextFunction) => {
   req.requestId = uuidv4();
   next();
 };

@@ -4,35 +4,42 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "test": "vitest run"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.6",
-    "@mui/material": "^7.3.6",
-    "@sentry/nextjs": "^10.32.1",
-    "@types/jwt-decode": "^2.2.1",
-    "axios": "^1.13.2",
-    "jwt-decode": "^4.0.0",
-    "lucide-react": "^0.263.0",
-    "next": "^14.0.0",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.19",
+    "@mui/material": "^5.14.20",
+    "@sentry/nextjs": "^10.38.0",
+    "axios": "^1.6.2",
+    "framer-motion": "^12.33.0",
+    "lucide-react": "^0.563.0",
+    "next": "^16.1.6",
+    "next-pwa": "^5.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^3.6.0"
+    "recharts": "^2.10.3"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "eslint": "^8.50.0",
-    "eslint-config-next": "^15.0.0",
-    "typescript": "^5.2.0"
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "jsdom": "^23.0.1",
+    "typescript": "^5",
+    "vitest": "^1.0.4"
   },
   "overrides": {
-    "glob": "^10.4.6"
+    "esbuild": "^0.25.0"
   }
 }

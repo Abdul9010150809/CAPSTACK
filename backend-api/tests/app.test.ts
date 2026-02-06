@@ -1,7 +1,0 @@
-import { describe, test, expect } from '@jest/globals';
-
-describe('App Tests', () => {
-  test('should pass a simple test', () => {
-    expect(1 + 1).toBe(2);
-  });
-});

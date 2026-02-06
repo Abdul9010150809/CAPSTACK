@@ -1,0 +1,32 @@
+{
+  "name": "capstack-blockchain",
+  "version": "1.0.0",
+  "description": "Smart contracts for CAPSTACK financial ecosystem",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "verify": "hardhat verify",
+    "node": "hardhat node",
+    "flatten": "hardhat flatten"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.7",
+    "ethers": "^6.7.1",
+    "hardhat": "^2.18.0",
+    "hardhat-gas-reporter": "^1.0.8",
+    "solidity-coverage": "^0.8.4",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1"
+  }
+}

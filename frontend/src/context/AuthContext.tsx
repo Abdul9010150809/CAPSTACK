@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { jwtDecode } from "jwt-decode";
+
 
 type User = {
   id: string;
@@ -18,6 +18,21 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper to decode JWT payload manually in the browser
+function parseJwt(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
         if (!token) {
           // No token - user is not authenticated (but can continue as guest)
           setUser(null);
@@ -35,8 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Try to decode token
-        const decoded = jwtDecode(token);
-        if (!decoded || typeof decoded !== 'object' || !('exp' in decoded)) {
+        const decoded = parseJwt(token);
+        if (!decoded || typeof decoded !== 'object' || !decoded.exp) {
           // Invalid token format
           localStorage.removeItem('token');
           setUser(null);
@@ -45,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const currentTime = Date.now() / 1000;
-        if ((decoded as any).exp <= currentTime) {
+        if (decoded.exp <= currentTime) {
           // Token expired
           localStorage.removeItem('token');
           setUser(null);
@@ -54,12 +69,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Token is valid - extract user info
-        const payload = decoded as any;
         const userData: User = {
-          id: payload.userId?.toString() || '1',
-          email: payload.email || null,
-          name: payload.name || 'User',
-          isGuest: payload.isGuest || false
+          id: decoded.userId?.toString() || '1',
+          email: decoded.email || null,
+          name: decoded.name || 'User',
+          isGuest: decoded.isGuest || false
         };
         setUser(userData);
       } catch (error) {
@@ -87,12 +101,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      logout, 
-      isAuthenticated: !!user 
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      logout,
+      isAuthenticated: !!user
     }}>
       {children}
     </AuthContext.Provider>

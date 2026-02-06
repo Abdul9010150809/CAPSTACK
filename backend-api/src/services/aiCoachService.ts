@@ -29,7 +29,7 @@ export const getDebtSnowballRecommendation = async (userId: number) => {
 const calculatePayoffTime = (debts: any[]) => {
   // Simplified calculation
   let totalTime = 0;
-  let extraPayment = 500; // Assume user can pay extra
+  const extraPayment = 500; // Assume user can pay extra
 
   for (const debt of debts) {
     const months = Math.log(1 + (debt.amount * debt.interestRate / 12) / extraPayment) / Math.log(1 + debt.interestRate / 12);

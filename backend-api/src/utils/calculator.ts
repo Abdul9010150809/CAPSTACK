@@ -6,7 +6,7 @@ export const calculateEMI = (principal: number, rate: number, tenure: number) =>
   const monthlyRate = rate / 100 / 12;
   const numPayments = tenure;
   const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
-              (Math.pow(1 + monthlyRate, numPayments) - 1);
+    (Math.pow(1 + monthlyRate, numPayments) - 1);
   return emi;
 };
 
@@ -17,7 +17,7 @@ export const calculateRatios = (income: number, expenses: number) => {
   };
 };
 
-export const scoreFinancialHealth = (ratios: any) => {
+export const scoreFinancialHealth = (_ratios: any) => {
   // TODO: Scoring logic
   return 75; // Dummy score
 };

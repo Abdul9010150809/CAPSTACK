@@ -7,6 +7,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     pin VARCHAR(4) NOT NULL,
     name VARCHAR(255),
+    is_guest BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -143,7 +144,7 @@ CREATE TABLE alerts (
     is_read BOOLEAN DEFAULT false,
     actionable BOOLEAN DEFAULT false,
     expires_at TIMESTAMP,
-    metadata NVARCHAR(MAX), -- Additional data for the alert
+    metadata TEXT, -- Additional data for the alert
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -157,7 +158,7 @@ CREATE TABLE financial_insights (
     description TEXT NOT NULL,
     confidence DECIMAL(3,2), -- 0-1
     impact VARCHAR(10), -- low, medium, high
-    recommendations NVARCHAR(MAX),
+    recommendations TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -173,7 +174,7 @@ CREATE TABLE transactions (
     merchant VARCHAR(255),
     payment_method VARCHAR(50), -- cash, card, bank_transfer, etc.
     is_recurring BOOLEAN DEFAULT false,
-    tags NVARCHAR(MAX), -- Tags for categorization (stored as JSON)
+    tags TEXT, -- Tags for categorization (stored as JSON)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -183,7 +184,7 @@ CREATE TABLE health_scores (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     total_score INTEGER NOT NULL,
     grade VARCHAR(5) NOT NULL,
-    category_scores NVARCHAR(MAX) NOT NULL, -- Detailed breakdown
+    category_scores TEXT NOT NULL, -- Detailed breakdown
     date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
